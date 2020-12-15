@@ -4,6 +4,17 @@
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
+import os
+import platform
+
+from datetime import datetime
+from typing import cast, Dict, List, Optional, Tuple, Any, Set
+from cura.CuraApplication import CuraApplication
+from UM.Workspace.WorkspaceWriter import WorkspaceWriter
+from UM.Settings.InstanceContainer import InstanceContainer
+
+from cura.CuraVersion import CuraVersion  # type: ignore
+
 import os.path
 import sys
 import json
@@ -43,55 +54,17 @@ class ImportExportProfiles(Extension, QObject,):
         self._preferences = self._application.getPreferences()
         self._preferences.addPreference("import_export_tools/dialog_path", "")
 
-        self._message = Message()
-
         self._dialog_options = QFileDialog.Options()
         if sys.platform == "linux" and "KDE_FULL_SESSION" in os.environ:
             self._dialog_options |= QFileDialog.DontUseNativeDialog
 
         self.setMenuName(catalog.i18nc("@item:inmenu", "Import Export Profiles"))
-        self.addMenuItem(catalog.i18nc("@item:inmenu", "Export current profile..."), self.exportProfilData)
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Export current profile"), self.exportData)
         self.addMenuItem("", lambda: None)
-        self.addMenuItem(catalog.i18nc("@item:inmenu", "Import a profile..."), self.importData)
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Import a profile"), self.importData)
 
 
-    def exportProfilData(self):
-        global_stack = self._application.getGlobalContainerStack()
-        if not global_stack or not global_stack.getMetaDataEntry("has_materials", False):
-            return
-        extruder_stack = global_stack.extruders.get("0")
-        if not extruder_stack:
-            return
-
-        approximate_material_diameter = extruder_stack.getApproximateMaterialDiameter()
-
-        if use_container_tree:
-            nozzle_name = extruder_stack.variant.getName()
-            machine_node = ContainerTree.getInstance().machines[global_stack.definition.getId()]
-            if nozzle_name not in machine_node.variants:
-                Logger.log("w", "Unable to find variant %s in container tree", nozzle_name)
-                return
-
-            material_nodes = machine_node.variants[nozzle_name].materials
-            materials_metadata = [
-                m.getMetadata() for m in material_nodes.values()
-                if float(m.getMetaDataEntry("approximate_diameter", -1)) == approximate_material_diameter
-            ]
-        else:
-            materials_metadata = [
-                m for m in ContainerRegistry.getInstance().findInstanceContainersMetadata(type = "material")
-                if "base_file" in m and m.get("approximate_diameter", -1) == approximate_material_diameter and m["id"] == m["base_file"]
-            ]
-
-        self._exportData(materials_metadata)
-
-
-    def _exportData(self, materials_metadata: List[Dict[str, Any]]) -> None:
-        try:
-            material_settings = json.loads(self._preferences.getValue("cura/material_settings"))
-        except:
-            Logger.logException("e", "Could not load material settings from preferences")
-            return
+    def exportData(self) -> None:
 
         file_name = QFileDialog.getSaveFileName(
             parent = None,
@@ -102,61 +75,112 @@ class ImportExportProfiles(Extension, QObject,):
         )[0]
 
         if not file_name:
-            Logger.log("d", "No file to export to selected")
+            Logger.log("d", "No file to export selected")
             return
 
         self._preferences.setValue("import_export_tools/dialog_path", os.path.dirname(file_name))
 
-        materials_metadata = [
-            {
-                "guid": m["GUID"],
-                "material": m["material"],
-                "brand": m.get("brand",""),
-                "name": m["name"],
-                "spool_weight": material_settings.get(m["GUID"], {}).get("spool_weight", ""),
-                "spool_cost": material_settings.get(m["GUID"], {}).get("spool_cost", "")
-            }
-            for m in materials_metadata
-            if "brand" in m
-        ]
-        materials_metadata.sort(key = lambda k: (k["brand"], k["material"], k["name"]))
+        machine_manager = CuraApplication.getInstance().getMachineManager()        
+        stack = CuraApplication.getInstance().getGlobalContainerStack()
 
+        global_stack = machine_manager.activeMachine
+
+        #Get extruder count
+        extruder_count=stack.getProperty("machine_extruder_count", "value")
+        
         exported_count = 0
         try:
             with open(file_name, 'w', newline='') as csv_file:
-                csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 csv_writer.writerow([
-                    "guid",
-                    "name",
-                    "weight (g)",
-                    "cost (%s)" % self._preferences.getValue("cura/currency")
+                    "Extruder",
+                    "Key",
+                    "Type",
+                    "Value"
                 ])
+                 
+                # Date
+                self._WriteRow(csv_writer,0,"Date","str",datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                # platform
+                self._WriteRow(csv_writer,0,"Os","str",str(platform.system()) + " " + str(platform.version())) 
+                # Version  
+                self._WriteRow(csv_writer,0,"Cura_Version","str",CuraVersion)
+                # Profile
+                P_Name = global_stack.qualityChanges.getMetaData().get("name", "")
+                self._WriteRow(csv_writer,0,"Profile","str",P_Name)
+                # Quality
+                Q_Name = global_stack.quality.getMetaData().get("name", "")
+                self._WriteRow(csv_writer,0,"Quality","str",Q_Name)
+                        
+                # Material
+                extruders = list(global_stack.extruders.values())  
+ 
+                # Define every section to get the same order as in the Cura Interface
+                # Modification from global_stack to extruders[0]
+                i=0
+                for Extrud in list(global_stack.extruders.values()):    
+                    i += 1                        
+                    self._doTree(Extrud,"resolution",csv_writer,0,i)
+                    self._doTree(Extrud,"shell",csv_writer,0,i)
+                    self._doTree(Extrud,"infill",csv_writer,0,i)
+                    self._doTree(Extrud,"material",csv_writer,0,i)
+                    self._doTree(Extrud,"speed",csv_writer,0,i)
+                    self._doTree(Extrud,"travel",csv_writer,0,i)
+                    self._doTree(Extrud,"cooling",csv_writer,0,i)
+                    self._doTree(Extrud,"dual",csv_writer,0,i)
+                    self._doTree(Extrud,"support",csv_writer,0,i)
+                    self._doTree(Extrud,"platform_adhesion",csv_writer,0,i)                   
+                    self._doTree(Extrud,"meshfix",csv_writer,0,i)             
+                    self._doTree(Extrud,"blackmagic",csv_writer,0,i)
+                    self._doTree(Extrud,"experimental",csv_writer,0,i)
 
-                for material in materials_metadata:
-                    try:
-                        csv_writer.writerow([
-                            material["guid"],
-                            "%s %s" % (material["brand"], material["name"]),
-                            material["spool_weight"],
-                            material["spool_cost"]
-                        ])
-                        exported_count += 1
-                    except:
-                        continue
         except:
-            Logger.logException("e", "Could not export settings to the selected file")
+            Logger.logException("e", "Could not export profile to the selected file")
             return
 
-        self._message.hide()
-        self._message = Message(
-            catalog.i18ncp(
-                "@info:status {0} is count", "Exported data for {0} material.", "Exported data for {0} materials.", exported_count
-            ).format(exported_count),
-            title=catalog.i18nc("@info:title", "Material Cost Tools")
-        )
-        self._message.show()
+        Message().hide()
+        Message("Exported data for profil %s" % P_Name, title = "Import Export CSV Profiles Tools").show()
 
+    def _WriteRow(self,csvwriter,Extrud,Key,KType,ValStr):
+        
+        csvwriter.writerow([
+                     "%d" % Extrud,
+                     Key,
+                     KType,
+                     str(ValStr)
+                ])
+               
+    def _doTree(self,stack,key,csvwriter,depth,extrud):   
+        #output node     
+        Pos=0
+        if stack.getProperty(key,"type") != "category":
+            
+            GetType=stack.getProperty(key,"type")
+            GetVal=stack.getProperty(key,"value")
+            
+            if str(GetType)=='float':
+                # GelValStr="{:.2f}".format(GetVal).replace(".00", "")  # Formatage
+                GelValStr="{:.4f}".format(GetVal).rstrip("0").rstrip(".") # Formatage
+            else:
+                # enum = Option list
+                if str(GetType)=='enum':
+                    definition_option=key + " option " + str(GetVal)
+                    get_option=str(GetVal)
+                    GetOption=stack.getProperty(key,"options")
+                    GetOptionDetail=GetOption[get_option]
+                    GelValStr=str(GetVal)
+                    # Logger.log("d", "GetType_doTree = %s ; %s ; %s ; %s",definition_option, GelValStr, GetOption, GetOptionDetail)
+                else:
+                    GelValStr=str(GetVal)
+            
+            self._WriteRow(csvwriter,extrud,key,str(GetType),GelValStr)
+            depth += 1
 
+        #look for children
+        if len(CuraApplication.getInstance().getGlobalContainerStack().getSettingDefinition(key).children) > 0:
+            for i in CuraApplication.getInstance().getGlobalContainerStack().getSettingDefinition(key).children:       
+                self._doTree(stack,i.key,csvwriter,depth,extrud)       
+                
     def importData(self) -> None:
         file_name = QFileDialog.getOpenFileName(
             parent = None,
@@ -172,80 +196,85 @@ class ImportExportProfiles(Extension, QObject,):
 
         self._preferences.setValue("import_export_tools/dialog_path", os.path.dirname(file_name))
 
-        try:
-            material_settings = json.loads(self._preferences.getValue("cura/material_settings"))
-        except:
-            Logger.logException("e", "Could not load material settings from preferences")
-            return
+        machine_manager = CuraApplication.getInstance().getMachineManager()        
+        stack = CuraApplication.getInstance().getGlobalContainerStack()
+        global_stack = machine_manager.activeMachine
 
+        #Get extruder count
+        extruder_count=stack.getProperty("machine_extruder_count", "value")
+        
+        extruders = list(global_stack.extruders.values())   
+        
         imported_count = 0
         try:
             with open(file_name, 'r', newline='') as csv_file:
-                csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                csv_reader = csv.reader(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 line_number = -1
                 for row in csv_reader:
                     line_number += 1
                     if line_number == 0:
-                        if len(row) < 4:
-                            continue
-                        match = re.search("cost\s\((.*)\)", row[3])
-                        if not match:
-                            continue
-
-                        currency = match.group(1)
-
-                        if currency != self._preferences.getValue("cura/currency"):
-
-                            result = QMessageBox.question(
-                                None,
-                                catalog.i18nc("@title:window", "Import weights and prices"),
-                                catalog.i18nc("@label",
-                                    "The file contains prices specified in %s, but your Cura is configured to use %s.\nAre you sure you want to import these prices as is?" % (
-                                        currency, self._preferences.getValue("cura/currency")
-                                    )
-                                )
-                            )
-
-                            if result == QMessageBox.No:
-                                return
+                        if len(row) < 3:
+                            continue         
                     else:
+                        # Logger.log("d", "Import Data = %s | %s | %s | %s",row[0], row[1], row[2], row[3])
                         try:
-                            (guid, name, weight, cost) = row[0:4]
+                            #(extrud, kkey, ktype, kvalue) = row[0:3]
+                            extrud=int(row[0])
+                            extrud -= 1
+                            kkey=row[1]
+                            ktype=row[2]
+                            kvalue=row[3]
+                            imported_count += 1
+                            #Logger.log("d", "Current Data = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)  
+                            if extrud<=extruder_count:
+                                try:
+                                    container=extruders[extrud]
+                                    try:
+                                        prop_value = container.getProperty(kkey, "value")
+                                        if prop_value != None :
+                                            if ktype == "str" or ktype == "enum":
+                                                if prop_value != kvalue :
+                                                    container.setProperty(kkey,"value",kvalue)
+                                                    Logger.log("d", "prop_value changed: %s = %s", kkey ,kvalue)
+                                                    
+                                            elif ktype == "bool" :
+                                                if kvalue == "True" or kvalue == "true" :
+                                                    C_bool=True
+                                                else:
+                                                    C_bool=False
+                                                
+                                                if prop_value != C_bool :
+                                                    Logger.log("d", "prop_value bool: %s" % prop_value)
+                                                    container.setProperty(kkey,"value",C_bool)
+                                                    Logger.log("d", "prop_value changed: %s = %s", kkey ,C_bool)
+                                                    
+                                            elif ktype == "int" :
+                                                if prop_value != float(kvalue) :
+                                                    container.setProperty(kkey,"value",int(kvalue))
+                                                    Logger.log("d", "prop_value changed: %s = %s", kkey ,kvalue)
+                                            
+                                            elif ktype == "float" :
+                                                if prop_value != float(kvalue) :
+                                                    container.setProperty(kkey,"value",float(kvalue))
+                                                    Logger.log("d", "prop_value changed: %s = %s", kkey ,kvalue)
+                                            else :
+                                                Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)                                                    
+                                    except:
+                                        Logger.log("e", "Error kkey: %s" % kkey)
+                                        continue                                       
+                                except:
+                                    Logger.log("e", "Error Extruder: %s" % row)
+                                    continue                             
                         except:
                             Logger.log("e", "Row does not have enough data: %s" % row)
                             continue
-
-                        try:
-                            uuid = UUID(guid)
-                        except:
-                            Logger.log("e", "UUID is malformed: %s" % row)
-                            continue
-
-                        data = {}
-                        try:
-                             data["spool_cost"] = float(cost)
-                        except:
-                            pass
-                        try:
-                            data["spool_weight"] = int(weight)
-                        except:
-                            pass
-                        if data:
-                            material_settings[guid] = data
-                            imported_count += 1
+                            
         except:
             Logger.logException("e", "Could not import settings from the selected file")
             return
 
-        self._preferences.setValue("cura/material_settings", json.dumps(material_settings))
 
-        self._message.hide()
-        self._message = Message(
-            catalog.i18ncp(
-                "@info:status {0} is count", "Imported weight & price for {0} material.", "Imported weights & prices for {0} materials.", imported_count
-            ).format(imported_count),
-            title=catalog.i18nc("@info:title", "Material Cost Tools")
-        )
-        self._message.show()
+        Message().hide()
+        Message("Imported profil for %d keys" % imported_count, title = "Import Export CSV Profiles Tools").show()
 
 

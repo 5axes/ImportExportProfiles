@@ -49,6 +49,8 @@ class ImportExportProfiles(Extension, QObject,):
     def __init__(self, parent = None) -> None:
         QObject.__init__(self, parent)
         Extension.__init__(self)
+        
+        self._Section =""
 
         self._application = Application.getInstance()
         self._preferences = self._application.getPreferences()
@@ -61,7 +63,7 @@ class ImportExportProfiles(Extension, QObject,):
         self.setMenuName(catalog.i18nc("@item:inmenu", "Import Export Profiles"))
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Export current profile"), self.exportData)
         self.addMenuItem("", lambda: None)
-        self.addMenuItem(catalog.i18nc("@item:inmenu", "Import a profile"), self.importData)
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Merge a profile"), self.importData)
 
 
     def exportData(self) -> None:
@@ -93,6 +95,7 @@ class ImportExportProfiles(Extension, QObject,):
             with open(file_name, 'w', newline='') as csv_file:
                 csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 csv_writer.writerow([
+                    "Section",
                     "Extruder",
                     "Key",
                     "Type",
@@ -100,17 +103,17 @@ class ImportExportProfiles(Extension, QObject,):
                 ])
                  
                 # Date
-                self._WriteRow(csv_writer,0,"Date","str",datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                # platform
-                self._WriteRow(csv_writer,0,"Os","str",str(platform.system()) + " " + str(platform.version())) 
+                self._WriteRow(csv_writer,"general",0,"Date","str",datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                # Platform
+                self._WriteRow(csv_writer,"general",0,"Os","str",str(platform.system()) + " " + str(platform.version())) 
                 # Version  
-                self._WriteRow(csv_writer,0,"Cura_Version","str",CuraVersion)
+                self._WriteRow(csv_writer,"general",0,"Cura_Version","str",CuraVersion)
                 # Profile
                 P_Name = global_stack.qualityChanges.getMetaData().get("name", "")
-                self._WriteRow(csv_writer,0,"Profile","str",P_Name)
+                self._WriteRow(csv_writer,"general",0,"Profile","str",P_Name)
                 # Quality
                 Q_Name = global_stack.quality.getMetaData().get("name", "")
-                self._WriteRow(csv_writer,0,"Quality","str",Q_Name)
+                self._WriteRow(csv_writer,"general",0,"Quality","str",Q_Name)
                         
                 # Material
                 extruders = list(global_stack.extruders.values())  
@@ -141,9 +144,10 @@ class ImportExportProfiles(Extension, QObject,):
         Message().hide()
         Message("Exported data for profil %s" % P_Name, title = "Import Export CSV Profiles Tools").show()
 
-    def _WriteRow(self,csvwriter,Extrud,Key,KType,ValStr):
+    def _WriteRow(self,csvwriter,Section,Extrud,Key,KType,ValStr):
         
         csvwriter.writerow([
+                     Section,
                      "%d" % Extrud,
                      Key,
                      KType,
@@ -153,7 +157,9 @@ class ImportExportProfiles(Extension, QObject,):
     def _doTree(self,stack,key,csvwriter,depth,extrud):   
         #output node     
         Pos=0
-        if stack.getProperty(key,"type") != "category":
+        if stack.getProperty(key,"type") == "category":
+            self._Section=key
+        else:
             
             GetType=stack.getProperty(key,"type")
             GetVal=stack.getProperty(key,"value")
@@ -173,7 +179,7 @@ class ImportExportProfiles(Extension, QObject,):
                 else:
                     GelValStr=str(GetVal)
             
-            self._WriteRow(csvwriter,extrud,key,str(GetType),GelValStr)
+            self._WriteRow(csvwriter,self._Section,extrud,key,str(GetType),GelValStr)
             depth += 1
 
         #look for children
@@ -206,6 +212,7 @@ class ImportExportProfiles(Extension, QObject,):
         extruders = list(global_stack.extruders.values())   
         
         imported_count = 0
+        CPro = ""
         try:
             with open(file_name, 'r', newline='') as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -213,19 +220,20 @@ class ImportExportProfiles(Extension, QObject,):
                 for row in csv_reader:
                     line_number += 1
                     if line_number == 0:
-                        if len(row) < 3:
+                        if len(row) < 4:
                             continue         
                     else:
-                        # Logger.log("d", "Import Data = %s | %s | %s | %s",row[0], row[1], row[2], row[3])
+                        # Logger.log("d", "Import Data = %s | %s | %s | %s | %s",row[0], row[1], row[2], row[3], row[4])
                         try:
                             #(extrud, kkey, ktype, kvalue) = row[0:3]
-                            extrud=int(row[0])
+                            section=row[0]
+                            extrud=int(row[1])
                             extrud -= 1
-                            kkey=row[1]
-                            ktype=row[2]
-                            kvalue=row[3]
-                            imported_count += 1
-                            #Logger.log("d", "Current Data = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)  
+                            kkey=row[2]
+                            ktype=row[3]
+                            kvalue=row[4]
+                            
+                            #Logger.log("d", "Current Data = %s | %d | %s | %s | %s", section,extrud, kkey, ktype, kvalue)  
                             if extrud<=extruder_count:
                                 try:
                                     container=extruders[extrud]
@@ -234,8 +242,10 @@ class ImportExportProfiles(Extension, QObject,):
                                         if prop_value != None :
                                             if ktype == "str" or ktype == "enum":
                                                 if prop_value != kvalue :
+                                                    stack.setProperty(kkey,"value",kvalue)
                                                     container.setProperty(kkey,"value",kvalue)
-                                                    Logger.log("d", "prop_value changed: %s = %s", kkey ,kvalue)
+                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
+                                                    imported_count += 1
                                                     
                                             elif ktype == "bool" :
                                                 if kvalue == "True" or kvalue == "true" :
@@ -244,21 +254,32 @@ class ImportExportProfiles(Extension, QObject,):
                                                     C_bool=False
                                                 
                                                 if prop_value != C_bool :
-                                                    Logger.log("d", "prop_value bool: %s" % prop_value)
+                                                    stack.setProperty(kkey,"value",C_bool)
                                                     container.setProperty(kkey,"value",C_bool)
-                                                    Logger.log("d", "prop_value changed: %s = %s", kkey ,C_bool)
+                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
+                                                    imported_count += 1
                                                     
                                             elif ktype == "int" :
-                                                if prop_value != float(kvalue) :
+                                                if prop_value != int(kvalue) :
+                                                    stack.setProperty(kkey,"value",int(kvalue))
                                                     container.setProperty(kkey,"value",int(kvalue))
-                                                    Logger.log("d", "prop_value changed: %s = %s", kkey ,kvalue)
+                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
+                                                    imported_count += 1
                                             
                                             elif ktype == "float" :
-                                                if prop_value != float(kvalue) :
-                                                    container.setProperty(kkey,"value",float(kvalue))
-                                                    Logger.log("d", "prop_value changed: %s = %s", kkey ,kvalue)
+                                                TransVal=round(float(kvalue),4)
+                                                if prop_value != TransVal :
+                                                    stack.setProperty(kkey,"value",TransVal)
+                                                    container.setProperty(kkey,"value",TransVal)
+                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, prop_value)
+                                                    imported_count += 1
                                             else :
-                                                Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)                                                    
+                                                Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
+                                        else:
+                                            # Logger.log("d", "Value None = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
+                                            if kkey=="Profile" :
+                                                CPro=kvalue
+                                                
                                     except:
                                         Logger.log("e", "Error kkey: %s" % kkey)
                                         continue                                       
@@ -275,6 +296,6 @@ class ImportExportProfiles(Extension, QObject,):
 
 
         Message().hide()
-        Message("Imported profil for %d keys" % imported_count, title = "Import Export CSV Profiles Tools").show()
+        Message("Imported profil %d changed keys from %s" % (imported_count, CPro) , title = "Import Export CSV Profiles Tools").show()
 
 

@@ -234,7 +234,7 @@ class ImportExportProfiles(Extension, QObject,):
                             kvalue=row[4]
                             
                             #Logger.log("d", "Current Data = %s | %d | %s | %s | %s", section,extrud, kkey, ktype, kvalue)  
-                            if extrud<=extruder_count:
+                            if extrud<extruder_count:
                                 try:
                                     container=extruders[extrud]
                                     try:

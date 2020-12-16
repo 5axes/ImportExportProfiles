@@ -10,16 +10,15 @@ import platform
 from datetime import datetime
 from typing import cast, Dict, List, Optional, Tuple, Any, Set
 from cura.CuraApplication import CuraApplication
-from UM.Workspace.WorkspaceWriter import WorkspaceWriter
-from UM.Settings.InstanceContainer import InstanceContainer
-
 from cura.CuraVersion import CuraVersion  # type: ignore
+from typing import List, Dict, Any
 
 import os.path
 import sys
 import json
 import re
-from uuid import UUID
+
+# Code from Aldo Hoeben / fieldOfView for this tips
 try:
     import csv
 except ImportError:
@@ -32,18 +31,9 @@ from UM.Extension import Extension
 from UM.Application import Application
 from UM.Logger import Logger
 from UM.Message import Message
-from UM.Settings.ContainerRegistry import ContainerRegistry
-
-use_container_tree = True
-try:
-    from cura.Machines.ContainerTree import ContainerTree
-except ImportError:
-    use_container_tree = False
 
 from UM.i18n import i18nCatalog
 catalog = i18nCatalog("cura")
-
-from typing import List, Dict, Any
 
 class ImportExportProfiles(Extension, QObject,):
     def __init__(self, parent = None) -> None:
@@ -55,7 +45,9 @@ class ImportExportProfiles(Extension, QObject,):
         self._application = Application.getInstance()
         self._preferences = self._application.getPreferences()
         self._preferences.addPreference("import_export_tools/dialog_path", "")
-
+        
+        
+        # thanks to Aldo Hoeben / fieldOfView for this code
         self._dialog_options = QFileDialog.Options()
         if sys.platform == "linux" and "KDE_FULL_SESSION" in os.environ:
             self._dialog_options |= QFileDialog.DontUseNativeDialog
@@ -67,7 +59,7 @@ class ImportExportProfiles(Extension, QObject,):
 
 
     def exportData(self) -> None:
-
+        # thanks to Aldo Hoeben / fieldOfView for this part of the code
         file_name = QFileDialog.getSaveFileName(
             parent = None,
             caption = catalog.i18nc("@title:window", "Save as"),
@@ -81,7 +73,8 @@ class ImportExportProfiles(Extension, QObject,):
             return
 
         self._preferences.setValue("import_export_tools/dialog_path", os.path.dirname(file_name))
-
+        # -----
+        
         machine_manager = CuraApplication.getInstance().getMachineManager()        
         stack = CuraApplication.getInstance().getGlobalContainerStack()
 
@@ -114,7 +107,9 @@ class ImportExportProfiles(Extension, QObject,):
                 # Quality
                 Q_Name = global_stack.quality.getMetaData().get("name", "")
                 self._WriteRow(csv_writer,"general",0,"Quality","str",Q_Name)
-                        
+                # Extruder_Count
+                self._WriteRow(csv_writer,"general",0,"Extruder_Count","int",str(extruder_count))
+                
                 # Material
                 extruders = list(global_stack.extruders.values())  
  
@@ -160,27 +155,27 @@ class ImportExportProfiles(Extension, QObject,):
         if stack.getProperty(key,"type") == "category":
             self._Section=key
         else:
-            
-            GetType=stack.getProperty(key,"type")
-            GetVal=stack.getProperty(key,"value")
-            
-            if str(GetType)=='float':
-                # GelValStr="{:.2f}".format(GetVal).replace(".00", "")  # Formatage
-                GelValStr="{:.4f}".format(GetVal).rstrip("0").rstrip(".") # Formatage
-            else:
-                # enum = Option list
-                if str(GetType)=='enum':
-                    definition_option=key + " option " + str(GetVal)
-                    get_option=str(GetVal)
-                    GetOption=stack.getProperty(key,"options")
-                    GetOptionDetail=GetOption[get_option]
-                    GelValStr=str(GetVal)
-                    # Logger.log("d", "GetType_doTree = %s ; %s ; %s ; %s",definition_option, GelValStr, GetOption, GetOptionDetail)
+            if stack.getProperty(key,"enabled") == True:
+                GetType=stack.getProperty(key,"type")
+                GetVal=stack.getProperty(key,"value")
+                
+                if str(GetType)=='float':
+                    # GelValStr="{:.2f}".format(GetVal).replace(".00", "")  # Formatage
+                    GelValStr="{:.4f}".format(GetVal).rstrip("0").rstrip(".") # Formatage
                 else:
-                    GelValStr=str(GetVal)
-            
-            self._WriteRow(csvwriter,self._Section,extrud,key,str(GetType),GelValStr)
-            depth += 1
+                    # enum = Option list
+                    if str(GetType)=='enum':
+                        definition_option=key + " option " + str(GetVal)
+                        get_option=str(GetVal)
+                        GetOption=stack.getProperty(key,"options")
+                        GetOptionDetail=GetOption[get_option]
+                        GelValStr=str(GetVal)
+                        # Logger.log("d", "GetType_doTree = %s ; %s ; %s ; %s",definition_option, GelValStr, GetOption, GetOptionDetail)
+                    else:
+                        GelValStr=str(GetVal)
+                
+                self._WriteRow(csvwriter,self._Section,extrud,key,str(GetType),GelValStr)
+                depth += 1
 
         #look for children
         if len(CuraApplication.getInstance().getGlobalContainerStack().getSettingDefinition(key).children) > 0:
@@ -188,6 +183,7 @@ class ImportExportProfiles(Extension, QObject,):
                 self._doTree(stack,i.key,csvwriter,depth,extrud)       
                 
     def importData(self) -> None:
+        # thanks to Aldo Hoeben / fieldOfView for this part of the code
         file_name = QFileDialog.getOpenFileName(
             parent = None,
             caption = catalog.i18nc("@title:window", "Open File"),
@@ -201,7 +197,8 @@ class ImportExportProfiles(Extension, QObject,):
             return
 
         self._preferences.setValue("import_export_tools/dialog_path", os.path.dirname(file_name))
-
+        # -----
+        
         machine_manager = CuraApplication.getInstance().getMachineManager()        
         stack = CuraApplication.getInstance().getGlobalContainerStack()
         global_stack = machine_manager.activeMachine

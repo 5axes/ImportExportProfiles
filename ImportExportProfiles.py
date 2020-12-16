@@ -242,7 +242,7 @@ class ImportExportProfiles(Extension, QObject,):
                                         if prop_value != None :
                                             if ktype == "str" or ktype == "enum":
                                                 if prop_value != kvalue :
-                                                    stack.setProperty(kkey,"value",kvalue)
+                                                    if extrud == 0 : stack.setProperty(kkey,"value",kvalue)
                                                     container.setProperty(kkey,"value",kvalue)
                                                     Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                     imported_count += 1
@@ -254,14 +254,14 @@ class ImportExportProfiles(Extension, QObject,):
                                                     C_bool=False
                                                 
                                                 if prop_value != C_bool :
-                                                    stack.setProperty(kkey,"value",C_bool)
+                                                    if extrud == 0 : stack.setProperty(kkey,"value",C_bool)
                                                     container.setProperty(kkey,"value",C_bool)
                                                     Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
                                                     imported_count += 1
                                                     
                                             elif ktype == "int" :
                                                 if prop_value != int(kvalue) :
-                                                    stack.setProperty(kkey,"value",int(kvalue))
+                                                    if extrud == 0 : stack.setProperty(kkey,"value",int(kvalue))
                                                     container.setProperty(kkey,"value",int(kvalue))
                                                     Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                     imported_count += 1
@@ -269,7 +269,7 @@ class ImportExportProfiles(Extension, QObject,):
                                             elif ktype == "float" :
                                                 TransVal=round(float(kvalue),4)
                                                 if prop_value != TransVal :
-                                                    stack.setProperty(kkey,"value",TransVal)
+                                                    if extrud == 0 : stack.setProperty(kkey,"value",TransVal)
                                                     container.setProperty(kkey,"value",TransVal)
                                                     Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, prop_value)
                                                     imported_count += 1

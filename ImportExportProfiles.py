@@ -222,7 +222,7 @@ class ImportExportProfiles(Extension, QObject,):
                     else:
                         # Logger.log("d", "Import Data = %s | %s | %s | %s | %s",row[0], row[1], row[2], row[3], row[4])
                         try:
-                            #(extrud, kkey, ktype, kvalue) = row[0:3]
+                            #(section, extrud, kkey, ktype, kvalue) = row[0:4]
                             section=row[0]
                             extrud=int(row[1])
                             extrud -= 1
@@ -237,11 +237,18 @@ class ImportExportProfiles(Extension, QObject,):
                                     try:
                                         prop_value = container.getProperty(kkey, "value")
                                         if prop_value != None :
+                                            
+                                            settable_per_extruder= container.getProperty(kkey, "settable_per_extruder")
+                                            # Logger.log("d", "%s settable_per_extruder : %s", kkey, str(settable_per_extruder))
+                                            
                                             if ktype == "str" or ktype == "enum":
                                                 if prop_value != kvalue :
                                                     if extrud == 0 : stack.setProperty(kkey,"value",kvalue)
-                                                    container.setProperty(kkey,"value",kvalue)
-                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
+                                                    if settable_per_extruder == True : 
+                                                        container.setProperty(kkey,"value",kvalue)
+                                                        Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
+                                                    else:
+                                                        Logger.log("d", "%s not settable_per_extruder", kkey)
                                                     imported_count += 1
                                                     
                                             elif ktype == "bool" :
@@ -252,23 +259,32 @@ class ImportExportProfiles(Extension, QObject,):
                                                 
                                                 if prop_value != C_bool :
                                                     if extrud == 0 : stack.setProperty(kkey,"value",C_bool)
-                                                    container.setProperty(kkey,"value",C_bool)
-                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
+                                                    if settable_per_extruder == True : 
+                                                        container.setProperty(kkey,"value",C_bool)
+                                                        Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
+                                                    else:
+                                                        Logger.log("d", "%s not settable_per_extruder", kkey)
                                                     imported_count += 1
                                                     
                                             elif ktype == "int" :
                                                 if prop_value != int(kvalue) :
                                                     if extrud == 0 : stack.setProperty(kkey,"value",int(kvalue))
-                                                    container.setProperty(kkey,"value",int(kvalue))
-                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
+                                                    if settable_per_extruder == True :
+                                                        container.setProperty(kkey,"value",int(kvalue))
+                                                        Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
+                                                    else:
+                                                        Logger.log("d", "%s not settable_per_extruder", kkey)
                                                     imported_count += 1
                                             
                                             elif ktype == "float" :
                                                 TransVal=round(float(kvalue),4)
-                                                if prop_value != TransVal :
+                                                if round(prop_value,4) != TransVal :
                                                     if extrud == 0 : stack.setProperty(kkey,"value",TransVal)
-                                                    container.setProperty(kkey,"value",TransVal)
-                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, prop_value)
+                                                    if settable_per_extruder == True : 
+                                                        container.setProperty(kkey,"value",TransVal)
+                                                        Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, prop_value)
+                                                    else:
+                                                        Logger.log("d", "%s not settable_per_extruder", kkey)
                                                     imported_count += 1
                                             else :
                                                 Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)

@@ -125,7 +125,10 @@ class ImportExportProfiles(Extension, QObject,):
                     self._doTree(Extrud,"speed",csv_writer,0,i)
                     self._doTree(Extrud,"travel",csv_writer,0,i)
                     self._doTree(Extrud,"cooling",csv_writer,0,i)
-                    self._doTree(Extrud,"dual",csv_writer,0,i)
+                    # If single extruder doesn't export the data
+                    if extruder_count>1 :
+                        self._doTree(Extrud,"dual",csv_writer,0,i)
+                        
                     self._doTree(Extrud,"support",csv_writer,0,i)
                     self._doTree(Extrud,"platform_adhesion",csv_writer,0,i)                   
                     self._doTree(Extrud,"meshfix",csv_writer,0,i)             

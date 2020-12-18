@@ -1,22 +1,23 @@
 # Copyright (c) 2020 5@xes
 # ImportExportProfiles is released under the terms of the AGPLv3 or higher.
+#
+# Version 0.0.3 : First functionnal release
+#
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 import os
 import platform
-
-from datetime import datetime
-from typing import cast, Dict, List, Optional, Tuple, Any, Set
-from cura.CuraApplication import CuraApplication
-from cura.CuraVersion import CuraVersion  # type: ignore
-from typing import List, Dict, Any
-
 import os.path
 import sys
-import json
 import re
+
+from datetime import datetime
+# from typing import cast, Dict, List, Optional, Tuple, Any, Set
+from cura.CuraApplication import CuraApplication
+from cura.CuraVersion import CuraVersion  # type: ignore
+
 
 # Code from Aldo Hoeben / fieldOfView for this tips
 try:
@@ -134,6 +135,11 @@ class ImportExportProfiles(Extension, QObject,):
                     self._doTree(Extrud,"meshfix",csv_writer,0,i)             
                     self._doTree(Extrud,"blackmagic",csv_writer,0,i)
                     self._doTree(Extrud,"experimental",csv_writer,0,i)
+                    
+                    # machine_settings
+                    self._Section ="machine_settings"
+                    # self._doTree(Extrud,"machine_nozzle_size",csv_writer,0,i)
+                    
 
         except:
             Logger.logException("e", "Could not export profile to the selected file")

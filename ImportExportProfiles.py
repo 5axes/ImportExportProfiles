@@ -2,6 +2,7 @@
 # ImportExportProfiles is released under the terms of the AGPLv3 or higher.
 #
 # Version 0.0.3 : First functionnal release
+# Version 0.0.5 : top_bottom for new release
 #
 
 from PyQt5.QtCore import QObject
@@ -121,6 +122,7 @@ class ImportExportProfiles(Extension, QObject,):
                     i += 1                        
                     self._doTree(Extrud,"resolution",csv_writer,0,i)
                     self._doTree(Extrud,"shell",csv_writer,0,i)
+                    self._doTree(Extrud,"top_bottom",csv_writer,0,i)
                     self._doTree(Extrud,"infill",csv_writer,0,i)
                     self._doTree(Extrud,"material",csv_writer,0,i)
                     self._doTree(Extrud,"speed",csv_writer,0,i)

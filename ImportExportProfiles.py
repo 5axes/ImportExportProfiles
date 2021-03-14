@@ -48,7 +48,20 @@ class ImportExportProfiles(Extension, QObject,):
         self._preferences = self._application.getPreferences()
         self._preferences.addPreference("import_export_tools/dialog_path", "")
         
-        
+
+        VersC=1.0
+
+        # Test version for futur release 4.9
+        if "master" in CuraVersion or "beta" in CuraVersion or "BETA" in CuraVersion:
+            #Logger.log('d', "Info CuraVersion --> " + str(CuraVersion))
+            VersC=4.9  # Master is always a developement version.
+        else:
+            try:
+                VersC = int(CuraVersion.split(".")[0])+int(CuraVersion.split(".")[1])/10
+            except:
+                pass
+
+                
         # thanks to Aldo Hoeben / fieldOfView for this code
         self._dialog_options = QFileDialog.Options()
         if sys.platform == "linux" and "KDE_FULL_SESSION" in os.environ:
@@ -122,7 +135,8 @@ class ImportExportProfiles(Extension, QObject,):
                     i += 1                        
                     self._doTree(Extrud,"resolution",csv_writer,0,i)
                     self._doTree(Extrud,"shell",csv_writer,0,i)
-                    self._doTree(Extrud,"top_bottom",csv_writer,0,i)
+                    if VersC > 4.8:
+                        self._doTree(Extrud,"top_bottom",csv_writer,0,i)
                     self._doTree(Extrud,"infill",csv_writer,0,i)
                     self._doTree(Extrud,"material",csv_writer,0,i)
                     self._doTree(Extrud,"speed",csv_writer,0,i)

@@ -135,6 +135,7 @@ class ImportExportProfiles(Extension, QObject,):
                     i += 1                        
                     self._doTree(Extrud,"resolution",csv_writer,0,i)
                     self._doTree(Extrud,"shell",csv_writer,0,i)
+                    # New section Arachne and 4.9 ?
                     if VersC > 4.8:
                         self._doTree(Extrud,"top_bottom",csv_writer,0,i)
                     self._doTree(Extrud,"infill",csv_writer,0,i)

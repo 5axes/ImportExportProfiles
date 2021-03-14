@@ -1,9 +1,12 @@
-# Copyright (c) 2020 5@xes
+#-------------------------------------------------------------------------------------------
+# Copyright (c) 2020-2021 5@xes
+# 
 # ImportExportProfiles is released under the terms of the AGPLv3 or higher.
 #
 # Version 0.0.3 : First functionnal release
-# Version 0.0.5 : top_bottom for new release
+# Version 1.0.5 : top_bottom for new release (Ready Arachne or futur 4.9?)
 #
+#-------------------------------------------------------------------------------------------
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QFileDialog, QMessageBox

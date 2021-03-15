@@ -51,7 +51,6 @@ class ImportExportProfiles(Extension, QObject,):
         self._preferences = self._application.getPreferences()
         self._preferences.addPreference("import_export_tools/dialog_path", "")
         
-
         VersC=1.0
 
         # Test version for futur release 4.9
@@ -160,7 +159,6 @@ class ImportExportProfiles(Extension, QObject,):
                     self._Section ="machine_settings"
                     # self._doTree(Extrud,"machine_nozzle_size",csv_writer,0,i)
                     
-
         except:
             Logger.logException("e", "Could not export profile to the selected file")
             return
@@ -335,7 +333,6 @@ class ImportExportProfiles(Extension, QObject,):
         except:
             Logger.logException("e", "Could not import settings from the selected file")
             return
-
 
         Message().hide()
         Message("Imported profil %d changed keys from %s" % (imported_count, CPro) , title = "Import Export CSV Profiles Tools").show()

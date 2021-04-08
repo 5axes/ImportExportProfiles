@@ -5,6 +5,7 @@
 #
 # Version 0.0.3 : First functionnal release
 # Version 1.0.5 : top_bottom for new release (Ready Arachne or futur 4.9?)
+# Version 1.0.6 : bug correction
 #
 #-------------------------------------------------------------------------------------------
 
@@ -62,6 +63,7 @@ class ImportExportProfiles(Extension, QObject,):
         else:
             try:
                 self.VersC = int(CuraVersion.split(".")[0])+int(CuraVersion.split(".")[1])/10
+
             except:
                 pass
 

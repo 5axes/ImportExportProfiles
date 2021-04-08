@@ -1,8 +1,12 @@
-# Copyright (c) 2020 5@xes
+#-------------------------------------------------------------------------------------------
+# Copyright (c) 2020-2021 5@xes
+# 
 # ImportExportProfiles is released under the terms of the AGPLv3 or higher.
 #
 # Version 0.0.3 : First functionnal release
+# Version 1.0.5 : top_bottom for new release (Ready Arachne or futur 4.9?)
 #
+#-------------------------------------------------------------------------------------------
 
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
@@ -17,7 +21,7 @@ from datetime import datetime
 # from typing import cast, Dict, List, Optional, Tuple, Any, Set
 from cura.CuraApplication import CuraApplication
 from cura.CuraVersion import CuraVersion  # type: ignore
-
+from UM.Version import Version
 
 # Code from Aldo Hoeben / fieldOfView for this tips
 try:
@@ -47,7 +51,21 @@ class ImportExportProfiles(Extension, QObject,):
         self._preferences = self._application.getPreferences()
         self._preferences.addPreference("import_export_tools/dialog_path", "")
         
+        self.VersC=1.0
+
+        # Test version for futur release 4.9
+        # Logger.log('d', "Info Version CuraVersion --> " + str(Version(CuraVersion)))
+        Logger.log('d', "Info CuraVersion --> " + str(CuraVersion))        
         
+        if "master" in CuraVersion or "beta" in CuraVersion or "BETA" in CuraVersion:
+            self.VersC=4.9  # Master is always a developement version.
+        else:
+            try:
+                self.VersC = int(CuraVersion.split(".")[0])+int(CuraVersion.split(".")[1])/10
+            except:
+                pass
+
+                
         # thanks to Aldo Hoeben / fieldOfView for this code
         self._dialog_options = QFileDialog.Options()
         if sys.platform == "linux" and "KDE_FULL_SESSION" in os.environ:
@@ -120,7 +138,11 @@ class ImportExportProfiles(Extension, QObject,):
                 for Extrud in list(global_stack.extruders.values()):    
                     i += 1                        
                     self._doTree(Extrud,"resolution",csv_writer,0,i)
+                    # Shell before 4.9 and now Walls
                     self._doTree(Extrud,"shell",csv_writer,0,i)
+                    # New section Arachne and 4.9 ?
+                    if self.VersC > 4.8:
+                        self._doTree(Extrud,"top_bottom",csv_writer,0,i)
                     self._doTree(Extrud,"infill",csv_writer,0,i)
                     self._doTree(Extrud,"material",csv_writer,0,i)
                     self._doTree(Extrud,"speed",csv_writer,0,i)
@@ -140,7 +162,6 @@ class ImportExportProfiles(Extension, QObject,):
                     self._Section ="machine_settings"
                     # self._doTree(Extrud,"machine_nozzle_size",csv_writer,0,i)
                     
-
         except:
             Logger.logException("e", "Could not export profile to the selected file")
             return
@@ -315,7 +336,6 @@ class ImportExportProfiles(Extension, QObject,):
         except:
             Logger.logException("e", "Could not import settings from the selected file")
             return
-
 
         Message().hide()
         Message("Imported profil %d changed keys from %s" % (imported_count, CPro) , title = "Import Export CSV Profiles Tools").show()

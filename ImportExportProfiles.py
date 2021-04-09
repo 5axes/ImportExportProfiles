@@ -52,17 +52,22 @@ class ImportExportProfiles(Extension, QObject,):
         self._preferences = self._application.getPreferences()
         self._preferences.addPreference("import_export_tools/dialog_path", "")
         
-        self.VersC=1.0
+        self.Major=1
+        self.Minor=0
 
         # Test version for futur release 4.9
         # Logger.log('d', "Info Version CuraVersion --> " + str(Version(CuraVersion)))
         Logger.log('d', "Info CuraVersion --> " + str(CuraVersion))        
         
         if "master" in CuraVersion or "beta" in CuraVersion or "BETA" in CuraVersion:
-            self.VersC=4.9  # Master is always a developement version.
+            # Master is always a developement version.
+            self.Major=4
+            self.Minor=9
+            
         else:
             try:
-                self.VersC = int(CuraVersion.split(".")[0])+int(CuraVersion.split(".")[1])/10
+                self.Major = int(CuraVersion.split(".")[0])
+                self.Minor = int(CuraVersion.split(".")[1])
 
             except:
                 pass
@@ -143,7 +148,7 @@ class ImportExportProfiles(Extension, QObject,):
                     # Shell before 4.9 and now Walls
                     self._doTree(Extrud,"shell",csv_writer,0,i)
                     # New section Arachne and 4.9 ?
-                    if self.VersC > 4.8:
+                    if self.Major >= 4 and self.Minor >= 9 :
                         self._doTree(Extrud,"top_bottom",csv_writer,0,i)
                     self._doTree(Extrud,"infill",csv_writer,0,i)
                     self._doTree(Extrud,"material",csv_writer,0,i)

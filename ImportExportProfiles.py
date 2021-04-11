@@ -6,6 +6,7 @@
 # Version 0.0.3 : First functionnal release
 # Version 1.0.5 : top_bottom for new release (Ready Arachne or futur 4.9?)
 # Version 1.0.6 : bug correction
+# Version 1.0.7 : Add sniff function for the import csv function
 #
 #-------------------------------------------------------------------------------------------
 
@@ -260,8 +261,13 @@ class ImportExportProfiles(Extension, QObject,):
         CPro = ""
         try:
             with open(file_name, 'r', newline='') as csv_file:
+                C_dialect = csv.Sniffer().sniff(csv_file.read(1024))
+                # Reset to begining file position
+                csv_file.seek(0, 0)
+                Logger.log("d", "Csv Import %s : Delimiter = %s Quotechar = %s", file_name, C_dialect.delimiter, C_dialect.quotechar)
                 # csv.QUOTE_MINIMAL  or csv.QUOTE_NONNUMERIC ?
-                csv_reader = csv.reader(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                # csv_reader = csv.reader(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                csv_reader = csv.reader(csv_file, dialect=C_dialect)
                 line_number = -1
                 for row in csv_reader:
                     line_number += 1

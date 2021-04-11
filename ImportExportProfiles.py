@@ -106,13 +106,22 @@ class ImportExportProfiles(Extension, QObject,):
 
         global_stack = machine_manager.activeMachine
 
-        #Get extruder count
+        # Get extruder count
         extruder_count=stack.getProperty("machine_extruder_count", "value")
+        
+        # for name in sorted(csv.list_dialects()):
+        #             Logger.log("d", "Dialect = %s" % name)
+        #             dialect = csv.get_dialect(name)
+        #             Logger.log("d", "Delimiter = %s" % dialect.delimiter)
         
         exported_count = 0
         try:
             with open(file_name, 'w', newline='') as csv_file:
+                # csv.QUOTE_MINIMAL  or csv.QUOTE_NONNUMERIC ?
                 csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                # E_dialect = csv.get_dialect("excel")
+                # csv_writer = csv.writer(csv_file, dialect=E_dialect)
+                
                 csv_writer.writerow([
                     "Section",
                     "Extruder",
@@ -249,6 +258,7 @@ class ImportExportProfiles(Extension, QObject,):
         CPro = ""
         try:
             with open(file_name, 'r', newline='') as csv_file:
+                # csv.QUOTE_MINIMAL  or csv.QUOTE_NONNUMERIC ?
                 csv_reader = csv.reader(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 line_number = -1
                 for row in csv_reader:

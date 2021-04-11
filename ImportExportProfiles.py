@@ -25,6 +25,7 @@ from cura.CuraVersion import CuraVersion  # type: ignore
 from UM.Version import Version
 
 # Python csv  : https://docs.python.org/fr/2/library/csv.html
+#               https://docs.python.org/3/library/csv.html
 # Code from Aldo Hoeben / fieldOfView for this tips
 try:
     import csv

@@ -160,7 +160,7 @@ class ImportExportProfiles(Extension, QObject,):
                     # Shell before 4.9 and now Walls
                     self._doTree(Extrud,"shell",csv_writer,0,i)
                     # New section Arachne and 4.9 ?
-                    if self.Major >= 4 and self.Minor >= 9 :
+                    if self.Major > 4 or ( self.Major == 4 and self.Minor >= 9 ) :
                         self._doTree(Extrud,"top_bottom",csv_writer,0,i)
                     self._doTree(Extrud,"infill",csv_writer,0,i)
                     self._doTree(Extrud,"material",csv_writer,0,i)

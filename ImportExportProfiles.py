@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------------------
-# Copyright (c) 2020-2021 5@xes
+# Copyright (c) 2020-2022 5@xes
 # 
 # ImportExportProfiles is released under the terms of the AGPLv3 or higher.
 #
@@ -8,11 +8,21 @@
 # Version 1.0.6 : bug correction
 # Version 1.0.7 : Add sniff function for the import csv function
 #
+# Version 1.1.0 : Update Cura 5.0
+#
 #-------------------------------------------------------------------------------------------
 
-from PyQt5.QtCore import QObject
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
+VERSION_QT5 = False
+try:
+    from PyQt6.QtCore import QObject
+    from PyQt6.QtWidgets import QFileDialog, QMessageBox
+except ImportError:
+    from PyQt5.QtCore import QObject
+    from PyQt5.QtWidgets import QFileDialog, QMessageBox
+    VERSION_QT5 = True
+    
+    
 import os
 import platform
 import os.path
@@ -76,10 +86,14 @@ class ImportExportProfiles(Extension, QObject,):
                 pass
 
                 
-        # thanks to Aldo Hoeben / fieldOfView for this code
-        self._dialog_options = QFileDialog.Options()
-        if sys.platform == "linux" and "KDE_FULL_SESSION" in os.environ:
-            self._dialog_options |= QFileDialog.DontUseNativeDialog
+        # Thanks to Aldo Hoeben / fieldOfView for this code
+        # QFileDialog.Options
+        if VERSION_QT5:
+            self._dialog_options = QFileDialog.Options()
+            if sys.platform == "linux" and "KDE_FULL_SESSION" in os.environ:
+                self._dialog_options |= QFileDialog.DontUseNativeDialog
+        else:
+            self._dialog_options = None
 
         self.setMenuName(catalog.i18nc("@item:inmenu", "Import Export Profiles"))
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Export current profile"), self.exportData)
@@ -89,14 +103,26 @@ class ImportExportProfiles(Extension, QObject,):
 
     def exportData(self) -> None:
         # thanks to Aldo Hoeben / fieldOfView for this part of the code
-        file_name = QFileDialog.getSaveFileName(
-            parent = None,
-            caption = catalog.i18nc("@title:window", "Save as"),
-            directory = self._preferences.getValue("import_export_tools/dialog_path"),
-            filter = "CSV files (*.csv)",
-            options = self._dialog_options
-        )[0]
-
+        file_name = ""
+        if VERSION_QT5:
+            file_name = QFileDialog.getSaveFileName(
+                parent = None,
+                caption = catalog.i18nc("@title:window", "Save as"),
+                directory = self._preferences.getValue("import_export_tools/dialog_path"),
+                filter = "CSV files (*.csv)",
+                options = self._dialog_options
+            )[0]
+        else:
+            dialog = QFileDialog()
+            dialog.setWindowTitle(catalog.i18nc("@title:window", "Save as"))
+            dialog.setDirectory(self._preferences.getValue("import_export_tools/dialog_path"))
+            dialog.setNameFilters(["CSV files (*.csv)"])
+            dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+            dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+            if dialog.exec():
+                file_name = dialog.selectedFiles()[0]
+                
+                
         if not file_name:
             Logger.log("d", "No file to export selected")
             return
@@ -149,12 +175,13 @@ class ImportExportProfiles(Extension, QObject,):
                 self._WriteRow(csv_writer,"general",0,"Extruder_Count","int",str(extruder_count))
                 
                 # Material
-                extruders = list(global_stack.extruders.values())  
+                # extruders = list(global_stack.extruders.values())  
+                extruder_stack = CuraApplication.getInstance().getExtruderManager().getActiveExtruderStacks()
  
                 # Define every section to get the same order as in the Cura Interface
                 # Modification from global_stack to extruders[0]
                 i=0
-                for Extrud in list(global_stack.extruders.values()):    
+                for Extrud in extruder_stack:    
                     i += 1                        
                     self._doTree(Extrud,"resolution",csv_writer,0,i)
                     # Shell before 4.9 and now Walls
@@ -233,14 +260,26 @@ class ImportExportProfiles(Extension, QObject,):
                 
     def importData(self) -> None:
         # thanks to Aldo Hoeben / fieldOfView for this part of the code
-        file_name = QFileDialog.getOpenFileName(
-            parent = None,
-            caption = catalog.i18nc("@title:window", "Open File"),
-            directory = self._preferences.getValue("import_export_tools/dialog_path"),
-            filter = "CSV files (*.csv)",
-            options = self._dialog_options
-        )[0]
-
+        file_name = ""
+        if VERSION_QT5:
+            file_name = QFileDialog.getOpenFileName(
+                parent = None,
+                caption = catalog.i18nc("@title:window", "Open File"),
+                directory = self._preferences.getValue("import_export_tools/dialog_path"),
+                filter = "CSV files (*.csv)",
+                options = self._dialog_options
+            )[0]
+        else:
+            dialog = QFileDialog()
+            dialog.setWindowTitle(catalog.i18nc("@title:window", "Open File"))
+            dialog.setDirectory(self._preferences.getValue("import_export_tools/dialog_path"))
+            dialog.setNameFilters(["CSV files (*.csv)"])
+            dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
+            dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+            if dialog.exec():
+                file_name = dialog.selectedFiles()[0]
+                
+                
         if not file_name:
             Logger.log("d", "No file to import from selected")
             return
@@ -255,7 +294,8 @@ class ImportExportProfiles(Extension, QObject,):
         #Get extruder count
         extruder_count=stack.getProperty("machine_extruder_count", "value")
         
-        extruders = list(global_stack.extruders.values())   
+        #extruders = list(global_stack.extruders.values())   
+        extruder_stack = CuraApplication.getInstance().getExtruderManager().getActiveExtruderStacks()
         
         imported_count = 0
         CPro = ""
@@ -288,7 +328,7 @@ class ImportExportProfiles(Extension, QObject,):
                             #Logger.log("d", "Current Data = %s | %d | %s | %s | %s", section,extrud, kkey, ktype, kvalue)  
                             if extrud<extruder_count:
                                 try:
-                                    container=extruders[extrud]
+                                    container=extruder_stack[extrud]
                                     try:
                                         prop_value = container.getProperty(kkey, "value")
                                         if prop_value != None :

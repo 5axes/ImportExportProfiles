@@ -72,10 +72,10 @@ class ImportExportProfiles(Extension, QObject,):
         # Logger.log('d', "Info Version CuraVersion --> " + str(Version(CuraVersion)))
         Logger.log('d', "Info CuraVersion --> " + str(CuraVersion))        
         
-        if "master" in CuraVersion or "beta" in CuraVersion or "BETA" in CuraVersion:
+        if "master" in CuraVersion :
             # Master is always a developement version.
             self.Major=4
-            self.Minor=9
+            self.Minor=20
             
         else:
             try:

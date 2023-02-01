@@ -205,8 +205,7 @@ class ImportExportProfiles(Extension, QObject,):
                     self._doTree(Extrud,"experimental",csv_writer,0,i)
                     
                     # machine_settings
-                    self._Section ="machine_settings"
-                    # self._doTree(Extrud,"machine_nozzle_size",csv_writer,0,i)
+                    # self._doTree(Extrud,"machine_settings",csv_writer,0,i)
                     
         except:
             Logger.logException("e", "Could not export profile to the selected file")

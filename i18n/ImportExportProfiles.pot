@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the ImportExportProfiles package.
+# This file is distributed under the same license as the HtmlCuraSettings package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Spoon Anti-Warping\n"
+"Project-Id-Version: HtmlCuraSettings\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-26 15:37+0000\n"
+"POT-Creation-Date: 2023-02-02 17:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,84 +17,27 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: __init__.py:16
-msgctxt "@item:inlistbox"
-msgid "Cura Settings Documentation"
+#: ImportExportProfiles.py:109
+msgctxt "@item:inmenu"
+msgid "Import Export Profiles"
 msgstr ""
 
-#: HtmlCuraSettings.py:113
-msgctxt "@label"
-msgid "Print settings"
+#: ImportExportProfiles.py:110
+msgctxt "@item:inmenu"
+msgid "Export current profile"
 msgstr ""
 
-#: HtmlCuraSettings.py:114
-msgctxt "@action:label"
-msgid "Visible settings"
+#: ImportExportProfiles.py:112
+msgctxt "@item:inmenu"
+msgid "Merge a profile"
 msgstr ""
 
-#: HtmlCuraSettings.py:115
-msgctxt "@action:label"
-msgid "Custom selection"
+#: ImportExportProfiles.py:121 ImportExportProfiles.py:128
+msgctxt "@title:window"
+msgid "Save as"
 msgstr ""
 
-#: HtmlCuraSettings.py:141
-msgctxt "@label"
-msgid "Job Name"
-msgstr ""
-
-#: HtmlCuraSettings.py:158
-msgctxt "@label"
-msgid "Intent"
-msgstr ""
-
-#: HtmlCuraSettings.py:160
-msgctxt "@label"
-msgid "Profile"
-msgstr ""
-
-#: HtmlCuraSettings.py:164
-msgctxt "@label:table_header"
-msgid "Quality"
-msgstr ""
-
-#: HtmlCuraSettings.py:176
-msgctxt "@label"
-msgid "Material"
-msgstr ""
-
-#: HtmlCuraSettings.py:176 HtmlCuraSettings.py:181 HtmlCuraSettings.py:297
-#: HtmlCuraSettings.py:365
-msgctxt "@label"
-msgid "Extruder"
-msgstr ""
-
-#: HtmlCuraSettings.py:181
-msgctxt "@label"
-msgid "Enabled"
-msgstr ""
-
-#: HtmlCuraSettings.py:190
-msgctxt "@label"
-msgid "Material estimation"
-msgstr ""
-
-#: HtmlCuraSettings.py:195
-msgctxt "@text"
-msgid "Material usage"
-msgstr ""
-
-#: HtmlCuraSettings.py:206 HtmlCuraSettings.py:209
-msgctxt "@label"
-msgid "Filament Cost"
-msgstr ""
-
-#: HtmlCuraSettings.py:212
-#, python-format
-msgctxt "@text"
-msgid "%d D %d H %d Mn"
-msgstr ""
-
-#: HtmlCuraSettings.py:213
-msgctxt "@label"
-msgid "Printing Time"
+#: ImportExportProfiles.py:277 ImportExportProfiles.py:284
+msgctxt "@title:window"
+msgid "Open File"
 msgstr ""

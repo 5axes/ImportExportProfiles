@@ -9,6 +9,7 @@
 # Version 1.0.7 : Add sniff function for the import csv function
 #
 # Version 1.1.0 : Update Cura 5.0
+# Version 1.2.0 : Integrate French Translation
 #
 #-------------------------------------------------------------------------------------------
 
@@ -52,7 +53,17 @@ from UM.Logger import Logger
 from UM.Message import Message
 
 from UM.i18n import i18nCatalog
-catalog = i18nCatalog("cura")
+from UM.Resources import Resources
+
+Resources.addSearchPath(
+	os.path.join(os.path.abspath(os.path.dirname(__file__)))
+)  # Plugin translation file import
+
+catalog = i18nCatalog("ImportExportProfiles")
+
+if catalog.hasTranslationLoaded():
+	Logger.log("i", "ImportExportProfiles Plugin translation loaded!")
+
 
 class ImportExportProfiles(Extension, QObject,):
     def __init__(self, parent = None) -> None:

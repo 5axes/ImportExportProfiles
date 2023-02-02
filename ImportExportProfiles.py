@@ -59,10 +59,10 @@ Resources.addSearchPath(
 	os.path.join(os.path.abspath(os.path.dirname(__file__)))
 )  # Plugin translation file import
 
-catalog = i18nCatalog("ImportExportProfiles")
+catalog = i18nCatalog("profiles")
 
 if catalog.hasTranslationLoaded():
-	Logger.log("i", "ImportExportProfiles Plugin translation loaded!")
+	Logger.log("i", "Import Export Profiles Plugin translation loaded!")
 
 
 class ImportExportProfiles(Extension, QObject,):

@@ -398,7 +398,7 @@ class ImportExportProfiles(Extension, QObject,):
                                                 #Cas des tableaux
                                                 Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
                                                 try:
-                                                    container.setProperty(kkey,"value",TransVal)
+                                                    container.setProperty(kkey,"value",kvalue)
                                                 except:
                                                     continue
                                                  
@@ -422,6 +422,6 @@ class ImportExportProfiles(Extension, QObject,):
             return
 
         Message().hide()
-        Message(catalog.i18nc("@text", "Imported profil %d changed keys from %s") % (imported_count, CPro) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+        Message(catalog.i18nc("@text", "Imported profil : %d changed keys from %s") % (imported_count, CPro) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
 
 

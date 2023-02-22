@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Import Export Profiles\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-02 17:49+0000\n"
+"POT-Creation-Date: 2023-02-22 18:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,27 +17,44 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ImportExportProfiles.py:109
+#: ImportExportProfiles.py:111
 msgctxt "@item:inmenu"
 msgid "Import Export Profiles"
 msgstr ""
 
-#: ImportExportProfiles.py:110
+#: ImportExportProfiles.py:112
 msgctxt "@item:inmenu"
 msgid "Export current profile"
 msgstr ""
 
-#: ImportExportProfiles.py:112
+#: ImportExportProfiles.py:114
 msgctxt "@item:inmenu"
 msgid "Merge a profile"
 msgstr ""
 
-#: ImportExportProfiles.py:121 ImportExportProfiles.py:128
+#: ImportExportProfiles.py:123 ImportExportProfiles.py:130
 msgctxt "@title:window"
 msgid "Save as"
 msgstr ""
 
-#: ImportExportProfiles.py:277 ImportExportProfiles.py:284
+#: ImportExportProfiles.py:228
+#, python-format
+msgctxt "@text"
+msgid "Exported data for profil %s"
+msgstr ""
+
+#: ImportExportProfiles.py:228 ImportExportProfiles.py:425
+msgctxt "@title"
+msgid "Import Export CSV Profiles Tools"
+msgstr ""
+
+#: ImportExportProfiles.py:279 ImportExportProfiles.py:286
 msgctxt "@title:window"
 msgid "Open File"
+msgstr ""
+
+#: ImportExportProfiles.py:425
+#, python-format
+msgctxt "@text"
+msgid "Imported profil %d changed keys from %s"
 msgstr ""

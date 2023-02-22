@@ -9,7 +9,9 @@
 # Version 1.0.7 : Add sniff function for the import csv function
 #
 # Version 1.1.0 : Update Cura 5.0
+#
 # Version 1.2.0 : Integrate French Translation
+# Version 1.2.1 : New texte translated
 #
 #-------------------------------------------------------------------------------------------
 
@@ -223,7 +225,7 @@ class ImportExportProfiles(Extension, QObject,):
             return
 
         Message().hide()
-        Message("Exported data for profil %s" % P_Name, title = "Import Export CSV Profiles Tools").show()
+        Message(catalog.i18nc("@text", "Exported data for profil %s") % P_Name, title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
 
     def _WriteRow(self,csvwriter,Section,Extrud,Key,KType,ValStr):
         
@@ -390,9 +392,16 @@ class ImportExportProfiles(Extension, QObject,):
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
+                                                        
                                                     imported_count += 1
                                             else :
+                                                #Cas des tableaux
                                                 Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
+                                                try:
+                                                    container.setProperty(kkey,"value",TransVal)
+                                                except:
+                                                    continue
+                                                 
                                         else:
                                             # Logger.log("d", "Value None = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
                                             if kkey=="Profile" :
@@ -413,6 +422,6 @@ class ImportExportProfiles(Extension, QObject,):
             return
 
         Message().hide()
-        Message("Imported profil %d changed keys from %s" % (imported_count, CPro) , title = "Import Export CSV Profiles Tools").show()
+        Message(catalog.i18nc("@text", "Imported profil %d changed keys from %s") % (imported_count, CPro) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
 
 

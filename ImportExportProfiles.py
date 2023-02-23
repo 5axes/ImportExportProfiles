@@ -395,11 +395,12 @@ class ImportExportProfiles(Extension, QObject,):
                                                         
                                                     imported_count += 1
                                             else :
-                                                #Cas des tableaux
-                                                Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
+                                                #Cas des tableaux                                              
                                                 try:
                                                     container.setProperty(kkey,"value",kvalue)
+                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                 except:
+                                                    Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
                                                     continue
                                                  
                                         else:

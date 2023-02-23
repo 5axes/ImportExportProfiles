@@ -66,7 +66,6 @@ catalog = i18nCatalog("profiles")
 if catalog.hasTranslationLoaded():
 	Logger.log("i", "Import Export Profiles Plugin translation loaded!")
 
-
 class ImportExportProfiles(Extension, QObject,):
     def __init__(self, parent = None) -> None:
         QObject.__init__(self, parent)
@@ -108,14 +107,14 @@ class ImportExportProfiles(Extension, QObject,):
         else:
             self._dialog_options = None
 
-        self.setMenuName(catalog.i18nc("@item:inmenu", "Import Export Profiles"))
-        self.addMenuItem(catalog.i18nc("@item:inmenu", "Export current profile"), self.exportData)
+        self.setMenuName(catalog.i18nc("@item:inmenu", "Import/Export Settings"))
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Export Current Settings"), self.exportData)
         self.addMenuItem("", lambda: None)
-        self.addMenuItem(catalog.i18nc("@item:inmenu", "Merge a profile"), self.importData)
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Merge a CSV File"), self.importData)
 
 
     def exportData(self) -> None:
-        # thanks to Aldo Hoeben / fieldOfView for this part of the code
+        # Thanks to Aldo Hoeben / fieldOfView for this part of the code
         file_name = ""
         if VERSION_QT5:
             file_name = QFileDialog.getSaveFileName(
@@ -217,7 +216,8 @@ class ImportExportProfiles(Extension, QObject,):
                     self._doTree(Extrud,"blackmagic",csv_writer,0,i)
                     self._doTree(Extrud,"experimental",csv_writer,0,i)
                     
-                    # machine_settings
+                    # Machine_settings
+                    # Not Updated by This Plugin
                     # self._doTree(Extrud,"machine_settings",csv_writer,0,i)
                     
         except:
@@ -395,7 +395,7 @@ class ImportExportProfiles(Extension, QObject,):
                                                         
                                                     imported_count += 1
                                             else :
-                                                #Cas des tableaux                                              
+                                                # Case of the tables                                              
                                                 try:
                                                     container.setProperty(kkey,"value",kvalue)
                                                     Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Import Export Profiles\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-22 18:29+0000\n"
+"POT-Creation-Date: 2023-02-23 08:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,7 +43,7 @@ msgctxt "@text"
 msgid "Exported data for profil %s"
 msgstr ""
 
-#: ImportExportProfiles.py:228 ImportExportProfiles.py:425
+#: ImportExportProfiles.py:228 ImportExportProfiles.py:426
 msgctxt "@title"
 msgid "Import Export CSV Profiles Tools"
 msgstr ""
@@ -53,7 +53,7 @@ msgctxt "@title:window"
 msgid "Open File"
 msgstr ""
 
-#: ImportExportProfiles.py:425
+#: ImportExportProfiles.py:426
 #, python-format
 msgctxt "@text"
 msgid "Imported profil : %d changed keys from %s"

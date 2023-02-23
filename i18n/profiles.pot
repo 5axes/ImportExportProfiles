@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Import Export Profiles\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-23 08:24+0000\n"
+"POT-Creation-Date: 2023-02-23 08:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,22 +17,22 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: ImportExportProfiles.py:110
+msgctxt "@item:inmenu"
+msgid "Import/Export Settings"
+msgstr ""
+
 #: ImportExportProfiles.py:111
 msgctxt "@item:inmenu"
-msgid "Import Export Profiles"
+msgid "Export Current Settings"
 msgstr ""
 
-#: ImportExportProfiles.py:112
+#: ImportExportProfiles.py:113
 msgctxt "@item:inmenu"
-msgid "Export current profile"
+msgid "Merge a CSV File"
 msgstr ""
 
-#: ImportExportProfiles.py:114
-msgctxt "@item:inmenu"
-msgid "Merge a profile"
-msgstr ""
-
-#: ImportExportProfiles.py:123 ImportExportProfiles.py:130
+#: ImportExportProfiles.py:122 ImportExportProfiles.py:129
 msgctxt "@title:window"
 msgid "Save as"
 msgstr ""

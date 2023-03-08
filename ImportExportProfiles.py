@@ -34,10 +34,15 @@ import sys
 import re
 
 from datetime import datetime
-# from typing import cast, Dict, List, Optional, Tuple, Any, Set
+from typing import cast, Dict, List, Optional, Tuple, Any, Set
 from cura.CuraApplication import CuraApplication
+from cura.Settings.cura_empty_instance_containers import empty_quality_container
+from cura.Machines.ContainerTree import ContainerTree
+from cura.ReaderWriters.ProfileReader import NoProfileException, ProfileReader
+
+
 from cura.CuraVersion import CuraVersion  # type: ignore
-from UM.Version import Version
+
 
 
 # Python csv  : https://docs.python.org/fr/2/library/csv.html
@@ -55,9 +60,15 @@ from UM.Extension import Extension
 from UM.Application import Application
 from UM.Logger import Logger
 from UM.Message import Message
-
+from UM.Version import Version
 from UM.i18n import i18nCatalog
 from UM.Resources import Resources
+from UM.PluginRegistry import PluginRegistry  # For getting the possible profile writers to write with.
+from UM.Settings.ContainerRegistry import ContainerRegistry
+from UM.Settings.Interfaces import ContainerInterface, ContainerRegistryInterface
+from UM.Util import parseBool
+
+i18n_cura_catalog = i18nCatalog("cura")
 
 Resources.addSearchPath(
 	os.path.join(os.path.abspath(os.path.dirname(__file__)))
@@ -300,11 +311,219 @@ class ImportExportProfiles(Extension, QObject,):
             return
 
         #Logger.log("d", "File_name : {}".format(file_name))
-        result = CuraApplication.getInstance().getContainerRegistry().importProfile(file_name)
-        
-        Logger.log("d", "Ret message : {}".format(result["message"]))
+        #result = CuraApplication.getInstance().getContainerRegistry().importProfile(file_name)
+        result = self.importMyProfile(file_name)
         
         Message(result["message"] , title = catalog.i18nc("@title", "Import Profiles Tools")).show()
+
+    def _getIOPlugins(self, io_type):
+        """Gets a list of profile writer plugins
+
+        :return: List of tuples of (plugin_id, meta_data).
+        """
+        plugin_registry = PluginRegistry.getInstance()
+        active_plugin_ids = plugin_registry.getActivePlugins()
+
+        result = []
+        for plugin_id in active_plugin_ids:
+            meta_data = plugin_registry.getMetaData(plugin_id)
+            if io_type in meta_data:
+                result.append( (plugin_id, meta_data) )
+        return result
+
+    # Original source Code from Ultimaker
+    # ContainerManager.py https://github.com/Ultimaker/Cura/blob/main/cura/Settings/ContainerManager.py
+    def importMyProfile(self, file_name: str) -> Dict[str, str]:
+        """Imports a profile from a file
+
+        :param file_name: The full path and filename of the profile to import.
+        :return: Dict with a 'status' key containing the string 'ok', 'warning' or 'error',
+            and a 'message' key containing a message for the user.
+        """
+
+        Logger.log("d", "Attempting to import profile %s", file_name)
+        if not file_name:
+            return { "status": "error", "message": i18n_cura_catalog.i18nc("@info:status Don't translate the XML tags <filename>!", "Failed to import profile from <filename>{0}</filename>: {1}", file_name, "Invalid path")}
+
+        global_stack = CuraApplication.getInstance().getGlobalContainerStack()
+        if not global_stack:
+            return {"status": "error", "message": i18n_cura_catalog.i18nc("@info:status Don't translate the XML tags <filename>!", "Can't import profile from <filename>{0}</filename> before a printer is added.", file_name)}
+        container_tree = ContainerTree.getInstance()
+
+        machine_extruders = global_stack.extruderList
+
+        plugin_registry = PluginRegistry.getInstance()
+        extension = file_name.split(".")[-1]
+
+        for plugin_id, meta_data in self._getIOPlugins("profile_reader"):
+            if meta_data["profile_reader"][0]["extension"] != extension:
+                continue
+            profile_reader = cast(ProfileReader, plugin_registry.getPluginObject(plugin_id))
+            try:
+                profile_or_list = profile_reader.read(file_name)  # Try to open the file with the profile reader.
+            except NoProfileException:
+                return { "status": "ok", "message": i18n_cura_catalog.i18nc("@info:status Don't translate the XML tags <filename>!", "No custom profile to import in file <filename>{0}</filename>", file_name)}
+            except Exception as e:
+                # Note that this will fail quickly. That is, if any profile reader throws an exception, it will stop reading. It will only continue reading if the reader returned None.
+                Logger.log("e", "Failed to import profile from %s: %s while using profile reader. Got exception %s", file_name, profile_reader.getPluginId(), str(e))
+                return { "status": "error", "message": i18n_cura_catalog.i18nc("@info:status Don't translate the XML tags <filename>!", "Failed to import profile from <filename>{0}</filename>:", file_name) + "\n<message>" + str(e) + "</message>"}
+
+            if profile_or_list:
+                # Ensure it is always a list of profiles
+                if not isinstance(profile_or_list, list):
+                    profile_or_list = [profile_or_list]
+
+                # First check if this profile is suitable for this machine
+                global_profile = None
+                extruder_profiles = []
+                if len(profile_or_list) == 1:
+                    global_profile = profile_or_list[0]
+                else:
+                    for profile in profile_or_list:
+                        if not profile.getMetaDataEntry("position"):
+                            global_profile = profile
+                        else:
+                            extruder_profiles.append(profile)
+                extruder_profiles = sorted(extruder_profiles, key = lambda x: int(x.getMetaDataEntry("position", default = "0")))
+                profile_or_list = [global_profile] + extruder_profiles
+
+                if not global_profile:
+                    Logger.log("e", "Incorrect profile [%s]. Could not find global profile", file_name)
+                    return { "status": "error",
+                             "message": i18n_cura_catalog.i18nc("@info:status Don't translate the XML tags <filename>!", "This profile <filename>{0}</filename> contains incorrect data, could not import it.", file_name)}
+                profile_definition = global_profile.getMetaDataEntry("definition")
+
+                # Make sure we have a profile_definition in the file:
+                if profile_definition is None:
+                    break
+                
+                Logger.log("d", "Profile_definition {}".format(profile_definition))
+                _containerRegistry = CuraApplication.getInstance().getContainerRegistry() #ContainerRegistry()  # type: ContainerRegistryInterface
+                machine_definitions = _containerRegistry.findContainers(id = profile_definition)
+                if not machine_definitions:
+                    Logger.log("e", "Incorrect profile [%s]. Unknown machine type [%s]", file_name, profile_definition)
+                    return {"status": "error",
+                            "message": i18n_cura_catalog.i18nc("@info:status Don't translate the XML tags <filename>!", "This profile <filename>{0}</filename> contains incorrect data, could not import it.", file_name)
+                            }
+                machine_definition = machine_definitions[0]
+
+                # Get the expected machine definition.
+                # i.e.: We expect gcode for a UM2 Extended to be defined as normal UM2 gcode...
+                has_machine_quality = parseBool(machine_definition.getMetaDataEntry("has_machine_quality", "false"))
+                profile_definition = machine_definition.getMetaDataEntry("quality_definition", machine_definition.getId()) if has_machine_quality else "fdmprinter"
+                expected_machine_definition = container_tree.machines[global_stack.definition.getId()].quality_definition
+
+                # And check if the profile_definition matches either one (showing error if not):
+                if profile_definition != expected_machine_definition:
+                    Logger.log("d", "Profile {file_name} is for machine {profile_definition}, but the current active machine is {expected_machine_definition}. Changing profile's definition.".format(file_name = file_name, profile_definition = profile_definition, expected_machine_definition = expected_machine_definition))
+                    global_profile.setMetaDataEntry("definition", expected_machine_definition)
+                    for extruder_profile in extruder_profiles:
+                        extruder_profile.setMetaDataEntry("definition", expected_machine_definition)
+
+                quality_name = global_profile.getName()
+                quality_type = global_profile.getMetaDataEntry("quality_type")
+
+                name_seed = os.path.splitext(os.path.basename(file_name))[0]
+                new_name = _containerRegistry.uniqueName(name_seed)
+
+                # Ensure it is always a list of profiles
+                if type(profile_or_list) is not list:
+                    profile_or_list = [profile_or_list]
+
+                # Make sure that there are also extruder stacks' quality_changes, not just one for the global stack
+                if len(profile_or_list) == 1:
+                    global_profile = profile_or_list[0]
+                    extruder_profiles = []
+                    for idx, extruder in enumerate(global_stack.extruderList):
+                        profile_id = ContainerRegistry.getInstance().uniqueName(global_stack.getId() + "_extruder_" + str(idx + 1))
+                        profile = InstanceContainer(profile_id)
+                        profile.setName(quality_name)
+                        profile.setMetaDataEntry("setting_version", CuraApplication.SettingVersion)
+                        profile.setMetaDataEntry("type", "quality_changes")
+                        profile.setMetaDataEntry("definition", expected_machine_definition)
+                        profile.setMetaDataEntry("quality_type", quality_type)
+                        profile.setDirty(True)
+                        if idx == 0:
+                            # Move all per-extruder settings to the first extruder's quality_changes
+                            for qc_setting_key in global_profile.getAllKeys():
+                                settable_per_extruder = global_stack.getProperty(qc_setting_key, "settable_per_extruder")
+                                if settable_per_extruder:
+                                    setting_value = global_profile.getProperty(qc_setting_key, "value")
+
+                                    setting_definition = global_stack.getSettingDefinition(qc_setting_key)
+                                    if setting_definition is not None:
+                                        new_instance = SettingInstance(setting_definition, profile)
+                                        new_instance.setProperty("value", setting_value)
+                                        new_instance.resetState()  # Ensure that the state is not seen as a user state.
+                                        profile.addInstance(new_instance)
+                                        profile.setDirty(True)
+
+                                    global_profile.removeInstance(qc_setting_key, postpone_emit = True)
+                        extruder_profiles.append(profile)
+
+                    for profile in extruder_profiles:
+                        profile_or_list.append(profile)
+
+                # Import all profiles
+                profile_ids_added = []  # type: List[str]
+                additional_message = None
+                for profile_index, profile in enumerate(profile_or_list):
+                    if profile_index == 0:
+                        # This is assumed to be the global profile
+                        profile_id = (cast(ContainerInterface, global_stack.getBottom()).getId() + "_" + name_seed).lower().replace(" ", "_")
+
+                    elif profile_index < len(machine_extruders) + 1:
+                        # This is assumed to be an extruder profile
+                        extruder_id = machine_extruders[profile_index - 1].definition.getId()
+                        extruder_position = str(profile_index - 1)
+                        if not profile.getMetaDataEntry("position"):
+                            profile.setMetaDataEntry("position", extruder_position)
+                        else:
+                            profile.setMetaDataEntry("position", extruder_position)
+                        profile_id = (extruder_id + "_" + name_seed).lower().replace(" ", "_")
+
+                    else:  # More extruders in the imported file than in the machine.
+                        continue  # Delete the additional profiles.
+
+                    # This function return the message 
+                    # catalog.i18nc("@info:status", "Warning: The profile is not visible because its quality type '{0}' is not available for the current configuration. Switch to a material/nozzle combination that can use this quality type.", quality_type)
+                    available_quality_groups_dict = {name: quality_group for name, quality_group in ContainerTree.getInstance().getCurrentQualityGroups().items() if quality_group.is_available}
+                    all_quality_groups_dict = ContainerTree.getInstance().getCurrentQualityGroups()
+                    
+                    quality_type = profile.getMetaDataEntry("quality_type")
+                    if quality_type not in available_quality_groups_dict:
+                        Logger.log("d", "quality_type {}".format(quality_type))
+                        Logger.log("d", "available_quality_groups_dict {} / {}".format(available_quality_groups_dict, all_quality_groups_dict))
+                        
+                        profile.setMetaDataEntry("quality_type", "standard")
+                    
+                    configuration_successful, message = _containerRegistry._configureProfile(profile, profile_id, new_name, expected_machine_definition)
+                    
+                    if configuration_successful:
+                        additional_message = message
+                    else:
+                        # Remove any profiles that were added.
+                        for profile_id in profile_ids_added + [profile.getId()]:
+                            _containerRegistry.removeContainer(profile_id)
+                        if not message:
+                            message = ""
+                        return {"status": "error", "message": i18n_cura_catalog.i18nc(
+                                "@info:status Don't translate the XML tag <filename>!",
+                                "Failed to import profile from <filename>{0}</filename>:",
+                                file_name) + " " + message}
+                    profile_ids_added.append(profile.getId())
+                result_status = "ok"
+                success_message = i18n_cura_catalog.i18nc("@info:status", "Successfully imported profile {0}.", profile_or_list[0].getName())
+                if additional_message:
+                    result_status = "warning"
+                    success_message += additional_message
+                return {"status": result_status, "message": success_message}
+
+            # This message is throw when the profile reader doesn't find any profile in the file
+            return {"status": "error", "message": i18n_cura_catalog.i18nc("@info:status", "File {0} does not contain any valid profile.", file_name)}
+
+        # If it hasn't returned by now, none of the plugins loaded the profile successfully.
+        return {"status": "error", "message": i18n_cura_catalog.i18nc("@info:status", "Profile {0} has an unknown file type or is corrupted.", file_name)}
         
     def importData(self) -> None:
         # thanks to Aldo Hoeben / fieldOfView for this part of the code

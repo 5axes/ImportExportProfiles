@@ -142,14 +142,13 @@ class ImportExportProfiles(Extension, QObject,):
 
         _containerRegistry = CuraApplication.getInstance().getContainerRegistry()
         value = self.profileName()
-        Logger.log("d", "ProfileName {}".format(value))
+        Logger.log("d", "Attempting to export ProfileName {}".format(value))
         
         #container_list = [cast(InstanceContainer, _containerRegistry.findContainers(id = quality_changes_group.metadata_for_global["id"])[0])]  # type: List[InstanceContainer]
         #for metadata in quality_changes_group.metadata_per_extruder.values():
         container_list = [] 
         for extruder_stack in CuraApplication.getInstance().getExtruderManager().getActiveExtruderStacks():
             for container in extruder_stack.getContainers():
-                Logger.log("d", "Extruder_stack Type : %s", container.getMetaDataEntry("type") )
                 if str(container.getMetaDataEntry("type")) == "quality_changes" :
                     if container.getName() != "empty" :
                         container_list.append(cast(InstanceContainer, container))
@@ -158,7 +157,6 @@ class ImportExportProfiles(Extension, QObject,):
                     
         Cstack = CuraApplication.getInstance().getGlobalContainerStack()
         for container in Cstack.getContainers():
-            Logger.log("d", "Extruder_stack Type : %s", container.getMetaDataEntry("type") )
             if str(container.getMetaDataEntry("type")) == "quality_changes" :
                 if container.getName() != "empty" :
                     container_list.append(cast(InstanceContainer, container))
@@ -344,7 +342,6 @@ class ImportExportProfiles(Extension, QObject,):
                         GetOption=stack.getProperty(key,"options")
                         GetOptionDetail=GetOption[get_option]
                         GelValStr=str(GetVal)
-                        # Logger.log("d", "GetType_doTree = %s ; %s ; %s ; %s",definition_option, GelValStr, GetOption, GetOptionDetail)
                     else:
                         GelValStr=str(GetVal)
                 
@@ -382,7 +379,6 @@ class ImportExportProfiles(Extension, QObject,):
             Logger.log("d", "No file to import from selected")
             return
 
-        #Logger.log("d", "File_name : {}".format(file_name))
         #result = CuraApplication.getInstance().getContainerRegistry().importProfile(file_name)
         result = self.importMyProfile(file_name)
         
@@ -469,7 +465,7 @@ class ImportExportProfiles(Extension, QObject,):
                 if profile_definition is None:
                     break
                 
-                Logger.log("d", "Profile_definition {}".format(profile_definition))
+                # Logger.log("d", "Profile_definition {}".format(profile_definition))
                 _containerRegistry = CuraApplication.getInstance().getContainerRegistry() #ContainerRegistry()  # type: ContainerRegistryInterface
                 machine_definitions = _containerRegistry.findContainers(id = profile_definition)
                 if not machine_definitions:
@@ -563,18 +559,19 @@ class ImportExportProfiles(Extension, QObject,):
                     quality_type = profile.getMetaDataEntry("quality_type")
                     quality_message = ''
                     if quality_type not in available_quality_groups_dict:
-                        Logger.log("d", "quality_type {}".format(quality_type))
-                        Logger.log("d", "available_quality_groups_dict {} / {}".format(available_quality_groups_dict, all_quality_groups_dict))
+                        
+                        # Logger.log("d", "quality_type {}".format(quality_type))
+                        # Logger.log("d", "available_quality_groups_dict {} / {}".format(available_quality_groups_dict, all_quality_groups_dict))
                         mode ="standard"
                         Cstack = CuraApplication.getInstance().getGlobalContainerStack()
                         for container in Cstack.getContainers():                          
                             if str(container.getMetaDataEntry("type")) == "quality" :
-                                Logger.log("d", "Container : {}".format(container.getMetaDataEntry("quality_type")) )
+                                # Logger.log("d", "Container : {}".format(container.getMetaDataEntry("quality_type")) )
                                 if container.getMetaDataEntry("quality_type") != "empty" :
                                     mode = container.getMetaDataEntry("quality_type")  
                                 else:
                                     mode ="standard"
-                        
+                        Logger.log("d", "Profile {file_name} is for quality {quality_type}, changed to {mode}. Changing profile's definition.".format(file_name = file_name, quality_type = quality_type, mode = mode))
                         profile.setMetaDataEntry("quality_type", mode)
                     
                         quality_message = catalog.i18nc("@info:status", "\nWarning: The profile have been switch from the quality '{}' to the Quality '{}'".format(quality_type, mode))

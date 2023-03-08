@@ -77,13 +77,9 @@ msgstr "Outils d'importation de profils"
 #: ImportExportProfiles.py:502
 msgctxt "@info:status"
 msgid ""
-"\n"
-"Warning: The profile have been switch from the quality '{}' to the Quality "
-"'Standard'"
+"\nWarning: The profile have been switch from the quality '{}' to the Quality 'Standard'"
 msgstr ""
-"\n"
-"Avertissement : Le profil est passé de la qualité '{}' à la qualité "
-"'Standard'."
+"\nAvertissement : Le profil est passé de la qualité '{}' à la qualité 'Standard'."
 
 #: ImportExportProfiles.py:539
 msgctxt "@filter"
@@ -95,20 +91,3 @@ msgstr "Fichiers CSV (*.csv)"
 msgctxt "@text"
 msgid "Imported profil : %d changed keys from %s"
 msgstr "Profil importé : %d clés modifiées depuis : %s"
-
-#~ msgctxt "@item:inmenu"
-#~ msgid "Import Export Profiles"
-#~ msgstr "Export-Import Profils"
-
-#~ msgctxt "@item:inmenu"
-#~ msgid "Export current profile"
-#~ msgstr "Exporter les réglages actuels"
-
-#~ msgctxt "@item:inmenu"
-#~ msgid "Merge a profile"
-#~ msgstr "Fusionner un fichier"
-
-#, python-format
-#~ msgctxt "@text"
-#~ msgid "Imported profil %d changed keys from %s"
-#~ msgstr "Le profil %d importé a changé les clés de %s"

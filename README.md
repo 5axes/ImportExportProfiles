@@ -7,6 +7,6 @@ Could be used to copy your settings from a printer to an other one, even if they
 
 - Step 2 : Merge these settings in the profile you need to update, regardless of the machine, the basic quality of the profile or the material.
 
-### Current limitations
+### Curaprofile
 
-The lastest release of the plugin also alow to export/import directly Cura profiles.
+The lastest release of the plugin also alow to export/import directly Cura Profiles.

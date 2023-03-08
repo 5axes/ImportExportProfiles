@@ -13,6 +13,7 @@
 # Version 1.2.0 : Integrate French Translation
 # Version 1.2.1 : New texte translated
 # Version 1.2.2 : Add import CuraProfile
+# Version 1.2.3 : Analyse Quality for Substitute inexisting quality
 #
 #-------------------------------------------------------------------------------------------
 

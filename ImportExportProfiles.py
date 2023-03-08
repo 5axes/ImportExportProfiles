@@ -487,6 +487,8 @@ class ImportExportProfiles(Extension, QObject,):
 
                     # This function return the message 
                     # catalog.i18nc("@info:status", "Warning: The profile is not visible because its quality type '{0}' is not available for the current configuration. Switch to a material/nozzle combination that can use this quality type.", quality_type)
+                    configuration_successful, message = _containerRegistry._configureProfile(profile, profile_id, new_name, expected_machine_definition)
+                    
                     available_quality_groups_dict = {name: quality_group for name, quality_group in ContainerTree.getInstance().getCurrentQualityGroups().items() if quality_group.is_available}
                     all_quality_groups_dict = ContainerTree.getInstance().getCurrentQualityGroups()
                     
@@ -497,7 +499,8 @@ class ImportExportProfiles(Extension, QObject,):
                         
                         profile.setMetaDataEntry("quality_type", "standard")
                     
-                    configuration_successful, message = _containerRegistry._configureProfile(profile, profile_id, new_name, expected_machine_definition)
+                        message = catalog.i18nc("@info:status", "\nWarning: The profile have been switch from the quality '{}' to the Quality 'Standard'".format(quality_type))
+
                     
                     if configuration_successful:
                         additional_message = message

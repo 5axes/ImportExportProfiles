@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: HtmlCuraSettings\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-22 18:25+0000\n"
-"PO-Revision-Date: 2023-02-22 19:28+0200\n"
+"POT-Creation-Date: 2023-03-08 12:44+0000\n"
+"PO-Revision-Date: 2023-03-08 13:47+0200\n"
 "Last-Translator: 5axes <5axes@free.fr>\n"
 "Language-Team: 5axes\n"
 "Language: fr\n"
@@ -17,47 +17,85 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
 
-#: ImportExportProfiles.py:111
-msgctxt "@item:inmenu"
-msgid "Import Export Profiles"
-msgstr "Export-Import Profils"
-
 #: ImportExportProfiles.py:112
 msgctxt "@item:inmenu"
-msgid "Export current profile"
+msgid "Import/Export Settings"
+msgstr "Import/Export Paramètres"
+
+#: ImportExportProfiles.py:113
+msgctxt "@item:inmenu"
+msgid "Export Current Settings"
 msgstr "Exporter les réglages actuels"
 
-#: ImportExportProfiles.py:114
+#: ImportExportProfiles.py:115
 msgctxt "@item:inmenu"
-msgid "Merge a profile"
-msgstr "Fusionner un fichier"
+msgid "Merge a CSV File"
+msgstr "Fusionner un fichier CSV"
 
-#: ImportExportProfiles.py:123 ImportExportProfiles.py:130
+#: ImportExportProfiles.py:116
+msgctxt "@item:inmenu"
+msgid "Import Cura Profile"
+msgstr "Importer un profil"
+
+#: ImportExportProfiles.py:125 ImportExportProfiles.py:132
 msgctxt "@title:window"
 msgid "Save as"
 msgstr "Sauver sous"
 
-#: ImportExportProfiles.py:228
+#: ImportExportProfiles.py:231
 #, python-format
 msgctxt "@text"
 msgid "Exported data for profil %s"
 msgstr "Données exportées pour profil %s"
 
-#: ImportExportProfiles.py:228 ImportExportProfiles.py:425
+#: ImportExportProfiles.py:231 ImportExportProfiles.py:462
 msgctxt "@title"
 msgid "Import Export CSV Profiles Tools"
 msgstr "Outils d'Importation/Exportation les réglages au format CSV"
 
-#: ImportExportProfiles.py:279 ImportExportProfiles.py:286
+#: ImportExportProfiles.py:282 ImportExportProfiles.py:289
+#: ImportExportProfiles.py:315 ImportExportProfiles.py:322
 msgctxt "@title:window"
 msgid "Open File"
 msgstr "Ouvrir Fichier"
 
-#: ImportExportProfiles.py:425
+#: ImportExportProfiles.py:284 ImportExportProfiles.py:291
+msgctxt "@filter"
+msgid "Curaprofile (*.curaprofile)"
+msgstr "Curaprofile (*.curaprofile)"
+
+#: ImportExportProfiles.py:291
+msgctxt "@filter"
+msgid "G-Code File (*.gcode)"
+msgstr "Fichier G-Code (*.gcode)"
+
+#: ImportExportProfiles.py:307
+msgctxt "@title"
+msgid "Import Profiles Tools"
+msgstr "Outils d'importation de profils"
+
+#: ImportExportProfiles.py:317
+msgctxt "@filter"
+msgid "CSV files (*.csv)"
+msgstr "Fichiers CSV (*.csv)"
+
+#: ImportExportProfiles.py:462
 #, python-format
 msgctxt "@text"
 msgid "Imported profil : %d changed keys from %s"
 msgstr "Profil importé : %d clés modifiées depuis : %s"
+
+#~ msgctxt "@item:inmenu"
+#~ msgid "Import Export Profiles"
+#~ msgstr "Export-Import Profils"
+
+#~ msgctxt "@item:inmenu"
+#~ msgid "Export current profile"
+#~ msgstr "Exporter les réglages actuels"
+
+#~ msgctxt "@item:inmenu"
+#~ msgid "Merge a profile"
+#~ msgstr "Fusionner un fichier"
 
 #, python-format
 #~ msgctxt "@text"

@@ -556,23 +556,38 @@ class ImportExportProfiles(Extension, QObject,):
 
                     else:  # More extruders in the imported file than in the machine.
                         continue  # Delete the additional profiles.
-
-                    # This function return the message 
-                    # catalog.i18nc("@info:status", "Warning: The profile is not visible because its quality type '{0}' is not available for the current configuration. Switch to a material/nozzle combination that can use this quality type.", quality_type)
-                    configuration_successful, message = _containerRegistry._configureProfile(profile, profile_id, new_name, expected_machine_definition)
                     
                     available_quality_groups_dict = {name: quality_group for name, quality_group in ContainerTree.getInstance().getCurrentQualityGroups().items() if quality_group.is_available}
                     all_quality_groups_dict = ContainerTree.getInstance().getCurrentQualityGroups()
                     
                     quality_type = profile.getMetaDataEntry("quality_type")
+                    quality_message = ''
                     if quality_type not in available_quality_groups_dict:
                         Logger.log("d", "quality_type {}".format(quality_type))
                         Logger.log("d", "available_quality_groups_dict {} / {}".format(available_quality_groups_dict, all_quality_groups_dict))
+                        mode ="standard"
+                        Cstack = CuraApplication.getInstance().getGlobalContainerStack()
+                        for container in Cstack.getContainers():                          
+                            if str(container.getMetaDataEntry("type")) == "quality" :
+                                Logger.log("d", "Container : {}".format(container.getMetaDataEntry("quality_type")) )
+                                if container.getMetaDataEntry("quality_type") != "empty" :
+                                    mode = container.getMetaDataEntry("quality_type")  
+                                else:
+                                    mode ="standard"
                         
-                        profile.setMetaDataEntry("quality_type", "standard")
+                        profile.setMetaDataEntry("quality_type", mode)
                     
-                        message = catalog.i18nc("@info:status", "\nWarning: The profile have been switch from the quality '{}' to the Quality 'Standard'".format(quality_type))
+                        quality_message = catalog.i18nc("@info:status", "\nWarning: The profile have been switch from the quality '{}' to the Quality '{}'".format(quality_type, mode))
 
+                    # This function return the message 
+                    # catalog.i18nc("@info:status", "Warning: The profile is not visible because its quality type '{0}' is not available for the current configuration. Switch to a material/nozzle combination that can use this quality type.", quality_type)
+                    configuration_successful, message = _containerRegistry._configureProfile(profile, profile_id, new_name, expected_machine_definition)
+                    
+                    if quality_message :
+                        if message == None :
+                            message = quality_message
+                        else :
+                            message += quality_message 
                     
                     if configuration_successful:
                         additional_message = message

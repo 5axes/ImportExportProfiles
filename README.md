@@ -7,6 +7,6 @@ Could be used to copy your settings from a printer to an other one, even if they
 
 - Step 2 : Merge these settings in the profile you need to update, regardless of the machine, the basic quality of the profile or the material.
 
-### Current limitations
+### Curaprofile
 
-In this release, it is not possible to merge defined parameters in array form : infill_angles, support_infill_angles, support_interface_angles, support_roof_angles...
+The lastest release of the plugin also alow to export/import directly Cura Profiles.

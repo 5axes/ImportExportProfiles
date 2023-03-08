@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Import Export Profiles\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-08 12:49+0000\n"
+"POT-Creation-Date: 2023-03-08 13:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,69 +17,126 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ImportExportProfiles.py:112
+#: ImportExportProfiles.py:123
 msgctxt "@item:inmenu"
 msgid "Import/Export Settings"
 msgstr ""
 
-#: ImportExportProfiles.py:113
+#: ImportExportProfiles.py:124
 msgctxt "@item:inmenu"
 msgid "Export Current Settings"
 msgstr ""
 
-#: ImportExportProfiles.py:115
+#: ImportExportProfiles.py:126
 msgctxt "@item:inmenu"
 msgid "Merge a CSV File"
 msgstr ""
 
-#: ImportExportProfiles.py:116
+#: ImportExportProfiles.py:127
 msgctxt "@item:inmenu"
 msgid "Import Cura Profile"
 msgstr ""
 
-#: ImportExportProfiles.py:125 ImportExportProfiles.py:132
+#: ImportExportProfiles.py:136 ImportExportProfiles.py:143
 msgctxt "@title:window"
 msgid "Save as"
 msgstr ""
 
-#: ImportExportProfiles.py:231
+#: ImportExportProfiles.py:242
 #, python-format
 msgctxt "@text"
 msgid "Exported data for profil %s"
 msgstr ""
 
-#: ImportExportProfiles.py:231 ImportExportProfiles.py:462
+#: ImportExportProfiles.py:242 ImportExportProfiles.py:681
 msgctxt "@title"
 msgid "Import Export CSV Profiles Tools"
 msgstr ""
 
-#: ImportExportProfiles.py:282 ImportExportProfiles.py:289
-#: ImportExportProfiles.py:315 ImportExportProfiles.py:322
+#: ImportExportProfiles.py:293 ImportExportProfiles.py:300
+#: ImportExportProfiles.py:534 ImportExportProfiles.py:541
 msgctxt "@title:window"
 msgid "Open File"
 msgstr ""
 
-#: ImportExportProfiles.py:284 ImportExportProfiles.py:291
+#: ImportExportProfiles.py:295 ImportExportProfiles.py:302
 msgctxt "@filter"
 msgid "Curaprofile (*.curaprofile)"
 msgstr ""
 
-#: ImportExportProfiles.py:291
+#: ImportExportProfiles.py:302
 msgctxt "@filter"
 msgid "G-Code File (*.gcode)"
 msgstr ""
 
-#: ImportExportProfiles.py:307
+#: ImportExportProfiles.py:317
 msgctxt "@title"
 msgid "Import Profiles Tools"
 msgstr ""
 
-#: ImportExportProfiles.py:317
+#: ImportExportProfiles.py:346
+#, python-brace-format
+msgctxt "@info:status Don't translate the XML tags <filename>!"
+msgid "Failed to import profile from <filename>{0}</filename>: {1}"
+msgstr ""
+
+#: ImportExportProfiles.py:350
+#, python-brace-format
+msgctxt "@info:status Don't translate the XML tags <filename>!"
+msgid ""
+"Can't import profile from <filename>{0}</filename> before a printer is added."
+msgstr ""
+
+#: ImportExportProfiles.py:365
+#, python-brace-format
+msgctxt "@info:status Don't translate the XML tags <filename>!"
+msgid "No custom profile to import in file <filename>{0}</filename>"
+msgstr ""
+
+#: ImportExportProfiles.py:369
+#, python-brace-format
+msgctxt "@info:status Don't translate the XML tags <filename>!"
+msgid "Failed to import profile from <filename>{0}</filename>:"
+msgstr ""
+
+#: ImportExportProfiles.py:393 ImportExportProfiles.py:406
+#, python-brace-format
+msgctxt "@info:status Don't translate the XML tags <filename>!"
+msgid ""
+"This profile <filename>{0}</filename> contains incorrect data, could not "
+"import it."
+msgstr ""
+
+#: ImportExportProfiles.py:512
+#, python-brace-format
+msgctxt "@info:status Don't translate the XML tag <filename>!"
+msgid "Failed to import profile from <filename>{0}</filename>:"
+msgstr ""
+
+#: ImportExportProfiles.py:516
+#, python-brace-format
+msgctxt "@info:status"
+msgid "Successfully imported profile {0}."
+msgstr ""
+
+#: ImportExportProfiles.py:523
+#, python-brace-format
+msgctxt "@info:status"
+msgid "File {0} does not contain any valid profile."
+msgstr ""
+
+#: ImportExportProfiles.py:526
+#, python-brace-format
+msgctxt "@info:status"
+msgid "Profile {0} has an unknown file type or is corrupted."
+msgstr ""
+
+#: ImportExportProfiles.py:536
 msgctxt "@filter"
 msgid "CSV files (*.csv)"
 msgstr ""
 
-#: ImportExportProfiles.py:462
+#: ImportExportProfiles.py:681
 #, python-format
 msgctxt "@text"
 msgid "Imported profil : %d changed keys from %s"

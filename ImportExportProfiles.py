@@ -66,6 +66,7 @@ from UM.Resources import Resources
 from UM.PluginRegistry import PluginRegistry  # For getting the possible profile writers to write with.
 from UM.Settings.ContainerRegistry import ContainerRegistry
 from UM.Settings.Interfaces import ContainerInterface, ContainerRegistryInterface
+from UM.Settings.InstanceContainer import InstanceContainer
 from UM.Util import parseBool
 
 i18n_cura_catalog = i18nCatalog("cura")
@@ -122,11 +123,76 @@ class ImportExportProfiles(Extension, QObject,):
 
         self.setMenuName(catalog.i18nc("@item:inmenu", "Import/Export Settings"))
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Export Current Settings"), self.exportData)
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Export Current Profile"), self.exportProfile)
         self.addMenuItem("", lambda: None)
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Merge a CSV File"), self.importData)
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Import Cura Profile"), self.importProfile)
 
+    def profileName(self)->str:
+        # Check for Profile Name
+        value = ''
+        for extruder_stack in CuraApplication.getInstance().getExtruderManager().getActiveExtruderStacks():
+            for container in extruder_stack.getContainers():
+                Logger.log("d", "Extruder_stack Type : %s", container.getMetaDataEntry("type") )
+                if str(container.getMetaDataEntry("type")) == "quality_changes" :
+                    value = container.getName()
+        return value
+        
+    def exportProfile(self) -> None:
 
+        _containerRegistry = CuraApplication.getInstance().getContainerRegistry()
+        value = self.profileName()
+        Logger.log("d", "ProfileName {}".format(value))
+        
+        #container_list = [cast(InstanceContainer, _containerRegistry.findContainers(id = quality_changes_group.metadata_for_global["id"])[0])]  # type: List[InstanceContainer]
+        #for metadata in quality_changes_group.metadata_per_extruder.values():
+        container_list = [] 
+        for extruder_stack in CuraApplication.getInstance().getExtruderManager().getActiveExtruderStacks():
+            for container in extruder_stack.getContainers():
+                Logger.log("d", "Extruder_stack Type : %s", container.getMetaDataEntry("type") )
+                if str(container.getMetaDataEntry("type")) == "quality_changes" :
+                    if container.getName() != "empty" :
+                        container_list.append(cast(InstanceContainer, container))
+                    else :
+                        Logger.log("d", "Container empty : {}".format(container) )
+                    
+        Cstack = CuraApplication.getInstance().getGlobalContainerStack()
+        for container in Cstack.getContainers():
+            Logger.log("d", "Extruder_stack Type : %s", container.getMetaDataEntry("type") )
+            if str(container.getMetaDataEntry("type")) == "quality_changes" :
+                if container.getName() != "empty" :
+                    container_list.append(cast(InstanceContainer, container))
+        
+        if len(container_list) :
+            file_name = ""
+            if VERSION_QT5:
+                file_name = QFileDialog.getSaveFileName(
+                    parent = None,
+                    caption = catalog.i18nc("@title:window", "Save as"),
+                    directory = self._preferences.getValue("import_export_tools/dialog_path"),
+                    filter = catalog.i18nc("@filter", "Cura Profile (*.curaprofile)"),
+                    options = self._dialog_options
+                )[0]
+            else:
+                dialog = QFileDialog()
+                dialog.setWindowTitle(catalog.i18nc("@title:window", "Save as"))
+                dialog.setDirectory(self._preferences.getValue("import_export_tools/dialog_path"))
+                dialog.setNameFilters([catalog.i18nc("@filter", "Cura Profile (*.curaprofile)")])
+                dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+                dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+                if dialog.exec():
+                    file_name = dialog.selectedFiles()[0]               
+                    
+            if not file_name:
+                Logger.log("d", "No file to export selected")
+                return
+                
+            _containerRegistry.exportQualityProfile(container_list, file_name, catalog.i18nc("@filter", "Cura Profile (*.curaprofile)"))
+            self._preferences.setValue("import_export_tools/dialog_path", os.path.dirname(file_name))
+        else:
+            Message().hide()
+            Message(catalog.i18nc("@text", "Nothing to export !"), title = catalog.i18nc("@title", "Export Profiles Tools")).show()            
+        
     def exportData(self) -> None:
         # Thanks to Aldo Hoeben / fieldOfView for this part of the code
         file_name = ""
@@ -135,14 +201,14 @@ class ImportExportProfiles(Extension, QObject,):
                 parent = None,
                 caption = catalog.i18nc("@title:window", "Save as"),
                 directory = self._preferences.getValue("import_export_tools/dialog_path"),
-                filter = "CSV files (*.csv)",
+                filter = catalog.i18nc("@filter", "CSV files (*.csv)"),
                 options = self._dialog_options
             )[0]
         else:
             dialog = QFileDialog()
             dialog.setWindowTitle(catalog.i18nc("@title:window", "Save as"))
             dialog.setDirectory(self._preferences.getValue("import_export_tools/dialog_path"))
-            dialog.setNameFilters(["CSV files (*.csv)"])
+            dialog.setNameFilters([catalog.i18nc("@filter", "CSV files (*.csv)")])
             dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
             dialog.setFileMode(QFileDialog.FileMode.AnyFile)
             if dialog.exec():
@@ -292,14 +358,14 @@ class ImportExportProfiles(Extension, QObject,):
                 parent = None,
                 caption = catalog.i18nc("@title:window", "Open File"),
                 directory = self._preferences.getValue("import_export_tools/dialog_path"),
-                filter = catalog.i18nc("@filter", "Curaprofile (*.curaprofile)"),
+                filter = catalog.i18nc("@filter", "Cura Profile (*.curaprofile)"),
                 options = self._dialog_options
             )[0]
         else:
             dialog = QFileDialog()
             dialog.setWindowTitle(catalog.i18nc("@title:window", "Open File"))
             dialog.setDirectory(self._preferences.getValue("import_export_tools/dialog_path"))
-            dialog.setNameFilters([catalog.i18nc("@filter", "Curaprofile (*.curaprofile)"),catalog.i18nc("@filter", "G-Code File (*.gcode)")])
+            dialog.setNameFilters([catalog.i18nc("@filter", "Cura Profile (*.curaprofile)"),catalog.i18nc("@filter", "G-Code File (*.gcode)")])
             dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
             dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
             if dialog.exec():

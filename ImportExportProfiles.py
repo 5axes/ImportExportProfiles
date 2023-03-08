@@ -12,6 +12,7 @@
 #
 # Version 1.2.0 : Integrate French Translation
 # Version 1.2.1 : New texte translated
+# Version 1.2.2 : Add import CuraProfile
 #
 #-------------------------------------------------------------------------------------------
 
@@ -37,6 +38,7 @@ from datetime import datetime
 from cura.CuraApplication import CuraApplication
 from cura.CuraVersion import CuraVersion  # type: ignore
 from UM.Version import Version
+
 
 # Python csv  : https://docs.python.org/fr/2/library/csv.html
 #               https://docs.python.org/3/library/csv.html
@@ -111,6 +113,7 @@ class ImportExportProfiles(Extension, QObject,):
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Export Current Settings"), self.exportData)
         self.addMenuItem("", lambda: None)
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Merge a CSV File"), self.importData)
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Import Cura Profile"), self.importProfile)
 
 
     def exportData(self) -> None:
@@ -269,7 +272,40 @@ class ImportExportProfiles(Extension, QObject,):
         if len(CuraApplication.getInstance().getGlobalContainerStack().getSettingDefinition(key).children) > 0:
             for i in CuraApplication.getInstance().getGlobalContainerStack().getSettingDefinition(key).children:       
                 self._doTree(stack,i.key,csvwriter,depth,extrud)       
+ 
+    def importProfile(self) -> None:
+        # 
+        file_name = ""
+        if VERSION_QT5:
+            file_name = QFileDialog.getOpenFileName(
+                parent = None,
+                caption = catalog.i18nc("@title:window", "Open File"),
+                directory = self._preferences.getValue("import_export_tools/dialog_path"),
+                filter = catalog.i18nc("@filter", "Curaprofile (*.curaprofile)"),
+                options = self._dialog_options
+            )[0]
+        else:
+            dialog = QFileDialog()
+            dialog.setWindowTitle(catalog.i18nc("@title:window", "Open File"))
+            dialog.setDirectory(self._preferences.getValue("import_export_tools/dialog_path"))
+            dialog.setNameFilters([catalog.i18nc("@filter", "Curaprofile (*.curaprofile)"),catalog.i18nc("@filter", "G-Code File (*.gcode)")])
+            dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
+            dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+            if dialog.exec():
+                file_name = dialog.selectedFiles()[0]
                 
+                
+        if not file_name:
+            Logger.log("d", "No file to import from selected")
+            return
+
+        #Logger.log("d", "File_name : {}".format(file_name))
+        result = CuraApplication.getInstance().getContainerRegistry().importProfile(file_name)
+        
+        Logger.log("d", "Ret message : {}".format(result["message"]))
+        
+        Message(result["message"] , title = catalog.i18nc("@title", "Import Profiles Tools")).show()
+        
     def importData(self) -> None:
         # thanks to Aldo Hoeben / fieldOfView for this part of the code
         file_name = ""
@@ -278,7 +314,7 @@ class ImportExportProfiles(Extension, QObject,):
                 parent = None,
                 caption = catalog.i18nc("@title:window", "Open File"),
                 directory = self._preferences.getValue("import_export_tools/dialog_path"),
-                filter = "CSV files (*.csv)",
+                filter = catalog.i18nc("@filter", "CSV files (*.csv)"),
                 options = self._dialog_options
             )[0]
         else:

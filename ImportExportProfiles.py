@@ -165,11 +165,13 @@ class ImportExportProfiles(Extension, QObject,):
         
         if len(container_list) :
             file_name = ""
+            tempo_file_name = self.profileName() + ".curaprofile"
             if VERSION_QT5:
+                path = os.path.join(self._preferences.getValue("import_export_tools/dialog_path"), tempo_file_name)
                 file_name = QFileDialog.getSaveFileName(
                     parent = None,
                     caption = catalog.i18nc("@title:window", "Save as"),
-                    directory = self._preferences.getValue("import_export_tools/dialog_path"),
+                    directory = path,
                     filter = catalog.i18nc("@filter", "Cura Profile (*.curaprofile)"),
                     options = self._dialog_options
                 )[0]
@@ -180,6 +182,7 @@ class ImportExportProfiles(Extension, QObject,):
                 dialog.setNameFilters([catalog.i18nc("@filter", "Cura Profile (*.curaprofile)")])
                 dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
                 dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+                dialog.selectFile(tempo_file_name)
                 if dialog.exec():
                     file_name = dialog.selectedFiles()[0]               
                     
@@ -196,21 +199,24 @@ class ImportExportProfiles(Extension, QObject,):
     def exportData(self) -> None:
         # Thanks to Aldo Hoeben / fieldOfView for this part of the code
         file_name = ""
+        tempo_file_name = self.profileName() + ".csv"
         if VERSION_QT5:
+            path = os.path.join(self._preferences.getValue("import_export_tools/dialog_path"), tempo_file_name)
             file_name = QFileDialog.getSaveFileName(
                 parent = None,
                 caption = catalog.i18nc("@title:window", "Save as"),
-                directory = self._preferences.getValue("import_export_tools/dialog_path"),
+                directory = path,
                 filter = catalog.i18nc("@filter", "CSV files (*.csv)"),
                 options = self._dialog_options
             )[0]
-        else:
+        else:    
             dialog = QFileDialog()
             dialog.setWindowTitle(catalog.i18nc("@title:window", "Save as"))
             dialog.setDirectory(self._preferences.getValue("import_export_tools/dialog_path"))
             dialog.setNameFilters([catalog.i18nc("@filter", "CSV files (*.csv)")])
             dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
             dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+            dialog.selectFile(tempo_file_name)
             if dialog.exec():
                 file_name = dialog.selectedFiles()[0]
                 

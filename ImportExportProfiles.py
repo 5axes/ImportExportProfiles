@@ -111,7 +111,6 @@ class ImportExportProfiles(Extension, QObject,):
 
             except:
                 pass
-
                 
         # Thanks to Aldo Hoeben / fieldOfView for this code
         # QFileDialog.Options
@@ -129,21 +128,23 @@ class ImportExportProfiles(Extension, QObject,):
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Merge a CSV File"), self.importData)
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Import Cura Profile"), self.importProfile)
 
+    # Return Actual ProfileName
     def profileName(self)->str:
         # Check for Profile Name
         value = ''
         for extruder_stack in CuraApplication.getInstance().getExtruderManager().getActiveExtruderStacks():
             for container in extruder_stack.getContainers():
-                Logger.log("d", "Extruder_stack Type : %s", container.getMetaDataEntry("type") )
+                # Logger.log("d", "Extruder_stack Type : %s", container.getMetaDataEntry("type") )
                 if str(container.getMetaDataEntry("type")) == "quality_changes" :
                     value = container.getName()
         return value
-        
+    
+    # Export CuraProfile
     def exportProfile(self) -> None:
 
         _containerRegistry = CuraApplication.getInstance().getContainerRegistry()
         value = self.profileName()
-        Logger.log("d", "Attempting to export ProfileName {}".format(value))
+        Logger.log("d", "Attempting to Export ProfileName {}".format(value))
         
         #container_list = [cast(InstanceContainer, _containerRegistry.findContainers(id = quality_changes_group.metadata_for_global["id"])[0])]  # type: List[InstanceContainer]
         #for metadata in quality_changes_group.metadata_per_extruder.values():
@@ -191,10 +192,12 @@ class ImportExportProfiles(Extension, QObject,):
                 
             _containerRegistry.exportQualityProfile(container_list, file_name, catalog.i18nc("@filter", "Cura Profile (*.curaprofile)"))
             self._preferences.setValue("import_export_tools/dialog_path", os.path.dirname(file_name))
+            
         else:
             Message().hide()
             Message(catalog.i18nc("@text", "Nothing to export !"), title = catalog.i18nc("@title", "Export Profiles Tools")).show()            
-        
+    
+    # Export CSV File    
     def exportData(self) -> None:
         # Thanks to Aldo Hoeben / fieldOfView for this part of the code
         file_name = ""
@@ -572,6 +575,7 @@ class ImportExportProfiles(Extension, QObject,):
                                     mode = container.getMetaDataEntry("quality_type")  
                                 else:
                                     mode ="standard"
+                        
                         Logger.log("d", "Profile {file_name} is for quality {quality_type}, changed to {mode}. Changing profile's definition.".format(file_name = file_name, quality_type = quality_type, mode = mode))
                         profile.setMetaDataEntry("quality_type", mode)
                     

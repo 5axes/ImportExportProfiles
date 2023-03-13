@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Import Export Profiles\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-10 16:47+0000\n"
+"POT-Creation-Date: 2023-03-13 13:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,7 +66,7 @@ msgid "Export Profiles Tools"
 msgstr ""
 
 #: ImportExportProfiles.py:211 ImportExportProfiles.py:218
-#: ImportExportProfiles.py:628
+#: ImportExportProfiles.py:629
 msgctxt "@filter"
 msgid "CSV files (*.csv)"
 msgstr ""
@@ -83,7 +83,7 @@ msgid "Import Export CSV Profiles Tools"
 msgstr ""
 
 #: ImportExportProfiles.py:366 ImportExportProfiles.py:373
-#: ImportExportProfiles.py:626 ImportExportProfiles.py:633
+#: ImportExportProfiles.py:627 ImportExportProfiles.py:634
 msgctxt "@title:window"
 msgid "Open File"
 msgstr ""

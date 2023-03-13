@@ -14,6 +14,7 @@
 # Version 1.2.1 : New texte translated
 # Version 1.2.2 : Add import CuraProfile
 # Version 1.2.3 : Analyse Quality for Substitute inexisting quality
+# Version 1.2.4 : Change i18n location
 #
 #-------------------------------------------------------------------------------------------
 
@@ -73,7 +74,7 @@ from UM.Util import parseBool
 i18n_cura_catalog = i18nCatalog("cura")
 
 Resources.addSearchPath(
-	os.path.join(os.path.abspath(os.path.dirname(__file__)))
+	os.path.join(os.path.abspath(os.path.dirname(__file__)),'resources')
 )  # Plugin translation file import
 
 catalog = i18nCatalog("profiles")

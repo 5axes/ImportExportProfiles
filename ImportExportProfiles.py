@@ -616,7 +616,8 @@ class ImportExportProfiles(Extension, QObject,):
 
         # If it hasn't returned by now, none of the plugins loaded the profile successfully.
         return {"status": "error", "message": i18n_cura_catalog.i18nc("@info:status", "Profile {0} has an unknown file type or is corrupted.", file_name)}
-        
+    
+    # Import CSV file
     def importData(self) -> None:
         # thanks to Aldo Hoeben / fieldOfView for this part of the code
         file_name = ""
@@ -753,8 +754,7 @@ class ImportExportProfiles(Extension, QObject,):
                                         else:
                                             # Logger.log("d", "Value None = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
                                             if kkey=="Profile" :
-                                                CPro=kvalue
-                                                
+                                                CPro=kvalue                                               
                                     except:
                                         Logger.log("e", "Error kkey: %s" % kkey)
                                         continue                                       

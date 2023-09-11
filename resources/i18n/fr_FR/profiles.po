@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: HtmlCuraSettings\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-08 17:40+0000\n"
-"PO-Revision-Date: 2023-03-08 19:29+0200\n"
+"PO-Revision-Date: 2023-09-11 14:26+0200\n"
 "Last-Translator: 5axes <5axes@free.fr>\n"
 "Language-Team: 5axes\n"
 "Language: fr\n"
@@ -30,7 +30,7 @@ msgstr "Exporter les réglages actuels"
 #: ImportExportProfiles.py:126
 msgctxt "@item:inmenu"
 msgid "Export Current Profile"
-msgstr ""
+msgstr "Exporter le Profil actuel"
 
 #: ImportExportProfiles.py:128
 msgctxt "@item:inmenu"
@@ -102,7 +102,7 @@ msgstr "Outils d'importation de profils"
 #, python-brace-format
 msgctxt "@info:status Don't translate the XML tags <filename>!"
 msgid "Failed to import profile from <filename>{0}</filename>: {1}"
-msgstr ""
+msgstr "Impossible d'importer le profil depuis <filename>{0}</filename>: {1}"
 
 #: ImportExportProfiles.py:422
 #, python-brace-format
@@ -110,18 +110,23 @@ msgctxt "@info:status Don't translate the XML tags <filename>!"
 msgid ""
 "Can't import profile from <filename>{0}</filename> before a printer is added."
 msgstr ""
+"Impossible d'importer le profil depuis <filename>{0}</filename> avant "
+"l'ajout d'une imprimante."
 
 #: ImportExportProfiles.py:437
 #, python-brace-format
 msgctxt "@info:status Don't translate the XML tags <filename>!"
 msgid "No custom profile to import in file <filename>{0}</filename>"
 msgstr ""
+"Aucun profil personnalisé à importer dans le fichier "
+"<filename>{0}</filename>"
 
 #: ImportExportProfiles.py:441
 #, python-brace-format
 msgctxt "@info:status Don't translate the XML tags <filename>!"
 msgid "Failed to import profile from <filename>{0}</filename>:"
 msgstr ""
+"Échec de l'importation du profil depuis le fichier <filename>{0}</filename>:"
 
 #: ImportExportProfiles.py:465 ImportExportProfiles.py:478
 #, python-brace-format
@@ -130,6 +135,8 @@ msgid ""
 "This profile <filename>{0}</filename> contains incorrect data, could not "
 "import it."
 msgstr ""
+"Le profil <filename>{0}</filename> contient des données incorrectes ; échec "
+"de l'importation."
 
 #: ImportExportProfiles.py:574
 msgctxt "@info:status"
@@ -147,24 +154,25 @@ msgstr ""
 msgctxt "@info:status Don't translate the XML tag <filename>!"
 msgid "Failed to import profile from <filename>{0}</filename>:"
 msgstr ""
+"Échec de l'importation du profil depuis le fichier <filename>{0}</filename>:"
 
 #: ImportExportProfiles.py:591
 #, python-brace-format
 msgctxt "@info:status"
 msgid "Successfully imported profile {0}."
-msgstr ""
+msgstr "Importation du profil {0} réussie."
 
 #: ImportExportProfiles.py:598
 #, python-brace-format
 msgctxt "@info:status"
 msgid "File {0} does not contain any valid profile."
-msgstr ""
+msgstr "Le fichier {0} ne contient pas de profil valide."
 
 #: ImportExportProfiles.py:601
 #, python-brace-format
 msgctxt "@info:status"
 msgid "Profile {0} has an unknown file type or is corrupted."
-msgstr ""
+msgstr "Le profil {0} est un type de fichier inconnu ou est corrompu."
 
 #: ImportExportProfiles.py:756
 #, python-format

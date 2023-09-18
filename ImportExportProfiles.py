@@ -13,7 +13,7 @@
 # Version 1.2.0 : Integrate French Translation
 # Version 1.2.1 : New texte translated
 # Version 1.2.2 : Add import CuraProfile
-# Version 1.2.3 : Analyse Quality for Substitute inexisting quality
+# Version 1.2.3 : Analyse Quality to Substitute non-existing quality
 # Version 1.2.4 : Change i18n location
 #
 #-------------------------------------------------------------------------------------------

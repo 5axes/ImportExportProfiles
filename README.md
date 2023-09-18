@@ -9,4 +9,4 @@ Could be used to copy your settings from a printer to an other one, even if they
 
 ### Curaprofile
 
-The lastest release of the plugin also alow to export/import directly Cura Profiles.
+The latest release of the plugin also alow to export/import directly Cura Profiles.

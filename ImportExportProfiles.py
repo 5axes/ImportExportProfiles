@@ -710,7 +710,7 @@ class ImportExportProfiles(Extension, QObject,):
                             klbl=row[4]
                             kvalue=row[5]
                             
-                            Logger.log("d", "Current Data = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue)  
+                            # Logger.log("d", "Current Data = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue)  
                             if extrud<extruder_count:
                                 try:
                                     container=extruder_stack[extrud]
@@ -727,7 +727,7 @@ class ImportExportProfiles(Extension, QObject,):
                                                     if settable_per_extruder == True : 
                                                         container.setProperty(kkey,"value",kvalue)
                                                         if byStep :
-                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, kvalue) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                            update_setting = self.changeValue(klbl)
                                 
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                     else:
@@ -744,12 +744,12 @@ class ImportExportProfiles(Extension, QObject,):
                                                     if extrud == 0 : 
                                                         stack.setProperty(kkey,"value",C_bool)
                                                         if byStep :
-                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys from %s") % (kkey, C_bool) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                            update_setting = self.changeValue(klbl)
                                                         
                                                     if settable_per_extruder == True : 
                                                         container.setProperty(kkey,"value",C_bool)
                                                         if byStep :
-                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, C_bool) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                            update_setting = self.changeValue(klbl)
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
@@ -760,12 +760,12 @@ class ImportExportProfiles(Extension, QObject,):
                                                     if extrud == 0 : 
                                                         stack.setProperty(kkey,"value",int(kvalue))
                                                         if byStep :
-                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, kvalue) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                            update_setting = self.changeValue(klbl)
                                                         
                                                     if settable_per_extruder == True :
                                                         container.setProperty(kkey,"value",int(kvalue))
                                                         if byStep :
-                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, kvalue) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                            update_setting = self.changeValue(klbl)
                                                         
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                     else:
@@ -778,13 +778,12 @@ class ImportExportProfiles(Extension, QObject,):
                                                     if extrud == 0 : 
                                                         stack.setProperty(kkey,"value",TransVal)
                                                         if byStep :
-                                                            # Logger.log("d", "Current Data float = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue)
                                                             update_setting = self.changeValue(klbl)
                                                             
                                                     if settable_per_extruder == True : 
                                                         container.setProperty(kkey,"value",TransVal)
                                                         if byStep :
-                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, str(TransVal)) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                            update_setting = self.changeValue(klbl)
                                                        
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, prop_value)
                                                     else:
@@ -796,7 +795,7 @@ class ImportExportProfiles(Extension, QObject,):
                                                 try:
                                                     container.setProperty(kkey,"value",kvalue)
                                                     if byStep :
-                                                        Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, kvalue) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                        update_setting = self.changeValue(klbl)
                                                   
                                                     Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                 except:
@@ -825,25 +824,30 @@ class ImportExportProfiles(Extension, QObject,):
         Message(catalog.i18nc("@text", "Imported profil : %d changed keys from %s") % (imported_count, CPro) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
 
     def changeValue(self, lblkey) -> bool:
-        Logger.logException("d", "In ChangeValue")
+        # Logger.logException("d", "In ChangeValue")
       
         dialog = self._createConfirmationDialog(lblkey)
 
         returnValue = dialog.exec()
         
-        Logger.log("d", "prop_value changed: %s = %s", lblkey ,returnValue)
-        
         if VERSION_QT5:
-            return returnValue == QMessageBox.Ok
+            returnValue == QMessageBox.Ok
         else:
-            return returnValue == QMessageBox.StandardButton.Ok
+            returnValue == QMessageBox.StandardButton.Ok
+            
+            Logger.log("d", "prop_value changed: %s = %s", lblkey ,returnValue)
+        if returnValue:
+            self._application.backend.forceSlice()
+            self._application.backend.slice()
+        
+        return returnValue
 
     def _createConfirmationDialog(self, lblkey):
         '''Create a message box prompting the user if they want to update parameter.'''
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information if VERSION_QT5 else QMessageBox.Icon.Information)
-        msgBox.setText(catalog.i18nc("@text", "Would you like to update : %s ?") % (lblkey) )
-        msgBox.setWindowTitle(catalog.i18nc("@title", "Update settings"))
+        msgBox.setText(catalog.i18nc("@text", "Would you like to update the slice for : %s ?") % (lblkey) )
+        msgBox.setWindowTitle(catalog.i18nc("@title", "Update slice"))
         msgBox.setStandardButtons((QMessageBox.Ok if VERSION_QT5 else QMessageBox.StandardButton.Ok) | (QMessageBox.Cancel if VERSION_QT5 else QMessageBox.StandardButton.Cancel))
         msgBox.setDefaultButton(QMessageBox.Ok if VERSION_QT5 else QMessageBox.StandardButton.Ok)
 

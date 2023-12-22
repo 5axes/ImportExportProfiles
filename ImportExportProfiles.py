@@ -723,7 +723,11 @@ class ImportExportProfiles(Extension, QObject,):
                                             
                                             if ktype == "str" or ktype == "enum":
                                                 if prop_value != kvalue :
-                                                    if extrud == 0 : stack.setProperty(kkey,"value",kvalue)
+                                                    if extrud == 0 : 
+                                                        stack.setProperty(kkey,"value",kvalue)
+                                                        if byStep :
+                                                            update_setting = self.changeValue(klbl)
+                                                            
                                                     if settable_per_extruder == True : 
                                                         container.setProperty(kkey,"value",kvalue)
                                                         if byStep :
@@ -825,22 +829,29 @@ class ImportExportProfiles(Extension, QObject,):
 
     def changeValue(self, lblkey) -> bool:
         # Logger.logException("d", "In ChangeValue")
-      
+        validValue = False 
         dialog = self._createConfirmationDialog(lblkey)
 
         returnValue = dialog.exec()
         
         if VERSION_QT5:
-            returnValue == QMessageBox.Ok
+            if returnValue == QMessageBox.Ok:
+                validValue = True
+            else:
+                validValue = False
         else:
-            returnValue == QMessageBox.StandardButton.Ok
+            if returnValue == QMessageBox.StandardButton.Ok:
+                validValue = True
+            else:
+                validValue = False               
             
-            Logger.log("d", "prop_value changed: %s = %s", lblkey ,returnValue)
-        if returnValue:
+        Logger.log("d", "validValue : %s : %s", lblkey ,validValue)
+            
+        if validValue:
             self._application.backend.forceSlice()
             self._application.backend.slice()
         
-        return returnValue
+        return validValue
 
     def _createConfirmationDialog(self, lblkey):
         '''Create a message box prompting the user if they want to update parameter.'''

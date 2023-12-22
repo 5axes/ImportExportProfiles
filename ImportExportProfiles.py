@@ -16,15 +16,20 @@
 # Version 1.2.3 : Analyse Quality to Substitute non-existing quality
 # Version 1.2.4 : Change i18n location
 #
+# Version 1.3.0 : Export also Setting Label & add import by step
 #-------------------------------------------------------------------------------------------
 
 
 VERSION_QT5 = False
 try:
     from PyQt6.QtCore import QObject
+    from PyQt6.QtCore import QTimer
+    from PyQt6.QtCore import pyqtSlot
     from PyQt6.QtWidgets import QFileDialog, QMessageBox
 except ImportError:
     from PyQt5.QtCore import QObject
+    from PyQt5.QtCore import QTimer
+    from PyQt5.QtCore import pyqtSlot
     from PyQt5.QtWidgets import QFileDialog, QMessageBox
     VERSION_QT5 = True
     
@@ -34,6 +39,7 @@ import platform
 import os.path
 import sys
 import re
+import time
 
 from datetime import datetime
 from typing import cast, Dict, List, Optional, Tuple, Any, Set
@@ -92,6 +98,10 @@ class ImportExportProfiles(Extension, QObject,):
         self._application = Application.getInstance()
         self._preferences = self._application.getPreferences()
         self._preferences.addPreference("import_export_tools/dialog_path", "")
+        self._change_dialog = None
+        self._update_timer = QTimer()
+        self._update_timer.setInterval(0)
+        self._update_timer.setSingleShot(True)
         
         self.Major=1
         self.Minor=0
@@ -99,6 +109,8 @@ class ImportExportProfiles(Extension, QObject,):
         # Test version for futur release 4.9
         # Logger.log('d', "Info Version CuraVersion --> " + str(Version(CuraVersion)))
         Logger.log('d', "Info CuraVersion --> " + str(CuraVersion))        
+        
+        self._qml_folder = "qml_qt6" if not VERSION_QT5 else "qml_qt5"
         
         if "master" in CuraVersion :
             # Master is always a developement version.
@@ -126,8 +138,10 @@ class ImportExportProfiles(Extension, QObject,):
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Export Current Settings"), self.exportData)
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Export Current Profile"), self.exportProfile)
         self.addMenuItem("", lambda: None)
-        self.addMenuItem(catalog.i18nc("@item:inmenu", "Merge a CSV File"), self.importData)
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Merge a CSV File"), self.importDataDirect)
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Import Cura Profile"), self.importProfile)
+        self.addMenuItem(" ", lambda: None)
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Merge by Step a CSV File"), self.importDataByStep)
 
     # Return Actual ProfileName
     def profileName(self)->str:
@@ -257,23 +271,24 @@ class ImportExportProfiles(Extension, QObject,):
                     "Extruder",
                     "Key",
                     "Type",
+                    "Label",
                     "Value"
                 ])
                  
                 # Date
-                self._WriteRow(csv_writer,"general",0,"Date","str",datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                self._WriteRow(csv_writer,"general",0,"Date","str","Date",datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 # Platform
-                self._WriteRow(csv_writer,"general",0,"Os","str",str(platform.system()) + " " + str(platform.version())) 
+                self._WriteRow(csv_writer,"general",0,"Os","str","Os",str(platform.system()) + " " + str(platform.version())) 
                 # Version  
-                self._WriteRow(csv_writer,"general",0,"Cura_Version","str",CuraVersion)
+                self._WriteRow(csv_writer,"general",0,"Cura_Version","str","Cura Version",CuraVersion)
                 # Profile
                 P_Name = global_stack.qualityChanges.getMetaData().get("name", "")
-                self._WriteRow(csv_writer,"general",0,"Profile","str",P_Name)
+                self._WriteRow(csv_writer,"general",0,"Profile","str","Profile",P_Name)
                 # Quality
                 Q_Name = global_stack.quality.getMetaData().get("name", "")
-                self._WriteRow(csv_writer,"general",0,"Quality","str",Q_Name)
+                self._WriteRow(csv_writer,"general",0,"Quality","str","Quality",Q_Name)
                 # Extruder_Count
-                self._WriteRow(csv_writer,"general",0,"Extruder_Count","int",str(extruder_count))
+                self._WriteRow(csv_writer,"general",0,"Extruder_Count","int","Extruder_Count",str(extruder_count))
                 
                 # Material
                 # extruders = list(global_stack.extruders.values())  
@@ -316,13 +331,14 @@ class ImportExportProfiles(Extension, QObject,):
         Message().hide()
         Message(catalog.i18nc("@text", "Exported data for profil %s") % P_Name, title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
 
-    def _WriteRow(self,csvwriter,Section,Extrud,Key,KType,ValStr):
+    def _WriteRow(self,csvwriter,Section,Extrud,Key,KType,KeyLbl,ValStr):
         
         csvwriter.writerow([
                      Section,
                      "%d" % Extrud,
                      Key,
                      KType,
+                     KeyLbl,
                      str(ValStr)
                 ])
                
@@ -335,6 +351,7 @@ class ImportExportProfiles(Extension, QObject,):
             if stack.getProperty(key,"enabled") == True:
                 GetType=stack.getProperty(key,"type")
                 GetVal=stack.getProperty(key,"value")
+                GetKeyLabl=stack.getProperty(key,"label")
                 
                 if str(GetType)=='float':
                     # GelValStr="{:.2f}".format(GetVal).replace(".00", "")  # Formatage
@@ -350,7 +367,7 @@ class ImportExportProfiles(Extension, QObject,):
                     else:
                         GelValStr=str(GetVal)
                 
-                self._WriteRow(csvwriter,self._Section,extrud,key,str(GetType),GelValStr)
+                self._WriteRow(csvwriter,self._Section,extrud,key,str(GetType),str(GetKeyLabl),GelValStr)
                 depth += 1
 
         #look for children
@@ -618,8 +635,14 @@ class ImportExportProfiles(Extension, QObject,):
         # If it hasn't returned by now, none of the plugins loaded the profile successfully.
         return {"status": "error", "message": i18n_cura_catalog.i18nc("@info:status", "Profile {0} has an unknown file type or is corrupted.", file_name)}
     
+    def importDataDirect(self) -> None:
+        self.importData(False)
+        
+    def importDataByStep(self) -> None:
+        self.importData(True)
+        
     # Import CSV file
-    def importData(self) -> None:
+    def importData(self, byStep: bool) -> None:
         # thanks to Aldo Hoeben / fieldOfView for this part of the code
         file_name = ""
         if VERSION_QT5:
@@ -665,7 +688,7 @@ class ImportExportProfiles(Extension, QObject,):
                 C_dialect = csv.Sniffer().sniff(csv_file.read(1024))
                 # Reset to begining file position
                 csv_file.seek(0, 0)
-                Logger.log("d", "Csv Import %s : Delimiter = %s Quotechar = %s", file_name, C_dialect.delimiter, C_dialect.quotechar)
+                Logger.log("d", "Csv Import %s : Delimiter = %s Quotechar = %s ByStep = %s", file_name, C_dialect.delimiter, C_dialect.quotechar , byStep)
                 # csv.QUOTE_MINIMAL  or csv.QUOTE_NONNUMERIC ?
                 # csv_reader = csv.reader(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 csv_reader = csv.reader(csv_file, dialect=C_dialect)
@@ -673,20 +696,21 @@ class ImportExportProfiles(Extension, QObject,):
                 for row in csv_reader:
                     line_number += 1
                     if line_number == 0:
-                        if len(row) < 4:
+                        if len(row) < 5:
                             continue         
                     else:
-                        # Logger.log("d", "Import Data = %s | %s | %s | %s | %s",row[0], row[1], row[2], row[3], row[4])
+                        # Logger.log("d", "Import Data = %s | %s | %s | %s | %s | %s",row[0], row[1], row[2], row[3], row[4], row[5])
                         try:
-                            #(section, extrud, kkey, ktype, kvalue) = row[0:4]
+                            #(section, extrud, kkey, ktype, kvalue) = row[0:5]
                             section=row[0]
                             extrud=int(row[1])
                             extrud -= 1
                             kkey=row[2]
                             ktype=row[3]
-                            kvalue=row[4]
+                            klbl=row[4]
+                            kvalue=row[5]
                             
-                            #Logger.log("d", "Current Data = %s | %d | %s | %s | %s", section,extrud, kkey, ktype, kvalue)  
+                            Logger.log("d", "Current Data = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue)  
                             if extrud<extruder_count:
                                 try:
                                     container=extruder_stack[extrud]
@@ -702,6 +726,9 @@ class ImportExportProfiles(Extension, QObject,):
                                                     if extrud == 0 : stack.setProperty(kkey,"value",kvalue)
                                                     if settable_per_extruder == True : 
                                                         container.setProperty(kkey,"value",kvalue)
+                                                        if byStep :
+                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, kvalue) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
@@ -714,9 +741,15 @@ class ImportExportProfiles(Extension, QObject,):
                                                     C_bool=False
                                                 
                                                 if prop_value != C_bool :
-                                                    if extrud == 0 : stack.setProperty(kkey,"value",C_bool)
+                                                    if extrud == 0 : 
+                                                        stack.setProperty(kkey,"value",C_bool)
+                                                        if byStep :
+                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys from %s") % (kkey, C_bool) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                        
                                                     if settable_per_extruder == True : 
                                                         container.setProperty(kkey,"value",C_bool)
+                                                        if byStep :
+                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, C_bool) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
@@ -724,9 +757,16 @@ class ImportExportProfiles(Extension, QObject,):
                                                     
                                             elif ktype == "int" :
                                                 if prop_value != int(kvalue) :
-                                                    if extrud == 0 : stack.setProperty(kkey,"value",int(kvalue))
+                                                    if extrud == 0 : 
+                                                        stack.setProperty(kkey,"value",int(kvalue))
+                                                        if byStep :
+                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, kvalue) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                        
                                                     if settable_per_extruder == True :
                                                         container.setProperty(kkey,"value",int(kvalue))
+                                                        if byStep :
+                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, kvalue) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                        
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
@@ -735,9 +775,18 @@ class ImportExportProfiles(Extension, QObject,):
                                             elif ktype == "float" :
                                                 TransVal=round(float(kvalue),4)
                                                 if round(prop_value,4) != TransVal :
-                                                    if extrud == 0 : stack.setProperty(kkey,"value",TransVal)
+                                                    if extrud == 0 : 
+                                                        stack.setProperty(kkey,"value",TransVal)
+                                                        if byStep :
+                                                            # Logger.log("d", "Current Data float = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue)
+                                                            update_setting = self.changeValue(klbl)
+                                                            
+                                                        
                                                     if settable_per_extruder == True : 
                                                         container.setProperty(kkey,"value",TransVal)
+                                                        if byStep :
+                                                            Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, str(TransVal)) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                       
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
@@ -747,13 +796,16 @@ class ImportExportProfiles(Extension, QObject,):
                                                 # Case of the tables                                              
                                                 try:
                                                     container.setProperty(kkey,"value",kvalue)
+                                                    if byStep :
+                                                        Message(catalog.i18nc("@text", "Imported : %d changed keys to %s") % (kkey, kvalue) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+                                                  
                                                     Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                 except:
                                                     Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
                                                     continue
                                                  
                                         else:
-                                            # Logger.log("d", "Value None = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
+                                            # Logger.log("d", "Current Data = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue) 
                                             if kkey=="Profile" :
                                                 CPro=kvalue                                               
                                     except:
@@ -773,4 +825,30 @@ class ImportExportProfiles(Extension, QObject,):
         Message().hide()
         Message(catalog.i18nc("@text", "Imported profil : %d changed keys from %s") % (imported_count, CPro) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
 
+    def changeValue(self, lblkey) -> bool:
+        Logger.logException("d", "In ChangeValue")
 
+          
+        Logger.log("d", "_update_timer.start")        
+        dialog = self._createConfirmationDialog(lblkey)
+
+        returnValue = dialog.exec()
+        
+        Logger.log("d", "prop_value changed: %s = %s, lblkey ,returnValue)
+        
+        if VERSION_QT5:
+            return returnValue == QMessageBox.Ok
+        else:
+            return returnValue == QMessageBox.StandardButton.Ok
+
+    def _createConfirmationDialog(self, lblkey):
+        '''Create a message box prompting the user if they want to update parameter.'''
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information if VERSION_QT5 else QMessageBox.Icon.Information)
+        msgBox.setText(catalog.i18nc("@text", "Would you like to update :") + lblkey )
+        msgBox.setWindowTitle(catalog.i18nc("@title", "Update settings"))
+        msgBox.setStandardButtons((QMessageBox.Ok if VERSION_QT5 else QMessageBox.StandardButton.Ok) | (QMessageBox.Cancel if VERSION_QT5 else QMessageBox.StandardButton.Cancel))
+        msgBox.setDefaultButton(QMessageBox.Ok if VERSION_QT5 else QMessageBox.StandardButton.Ok)
+
+        return msgBox
+        

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Import Export Profiles\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-22 12:33+0000\n"
+"POT-Creation-Date: 2023-12-22 12:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,8 +85,8 @@ msgstr ""
 #: ImportExportProfiles.py:332 ImportExportProfiles.py:730
 #: ImportExportProfiles.py:747 ImportExportProfiles.py:752
 #: ImportExportProfiles.py:763 ImportExportProfiles.py:768
-#: ImportExportProfiles.py:788 ImportExportProfiles.py:800
-#: ImportExportProfiles.py:826
+#: ImportExportProfiles.py:787 ImportExportProfiles.py:799
+#: ImportExportProfiles.py:825
 msgctxt "@title"
 msgid "Import Export CSV Profiles Tools"
 msgstr ""
@@ -174,7 +174,7 @@ msgstr ""
 
 #: ImportExportProfiles.py:730 ImportExportProfiles.py:752
 #: ImportExportProfiles.py:763 ImportExportProfiles.py:768
-#: ImportExportProfiles.py:788 ImportExportProfiles.py:800
+#: ImportExportProfiles.py:787 ImportExportProfiles.py:799
 #, python-format
 msgctxt "@text"
 msgid "Imported : %d changed keys to %s"
@@ -186,18 +186,19 @@ msgctxt "@text"
 msgid "Imported : %d changed keys from %s"
 msgstr ""
 
-#: ImportExportProfiles.py:826
+#: ImportExportProfiles.py:825
 #, python-format
 msgctxt "@text"
 msgid "Imported profil : %d changed keys from %s"
 msgstr ""
 
-#: ImportExportProfiles.py:848
+#: ImportExportProfiles.py:845
+#, python-format
 msgctxt "@text"
-msgid "Would you like to update :"
+msgid "Would you like to update : %s ?"
 msgstr ""
 
-#: ImportExportProfiles.py:849
+#: ImportExportProfiles.py:846
 msgctxt "@title"
 msgid "Update settings"
 msgstr ""

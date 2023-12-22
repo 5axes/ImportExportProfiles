@@ -781,7 +781,6 @@ class ImportExportProfiles(Extension, QObject,):
                                                             # Logger.log("d", "Current Data float = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue)
                                                             update_setting = self.changeValue(klbl)
                                                             
-                                                        
                                                     if settable_per_extruder == True : 
                                                         container.setProperty(kkey,"value",TransVal)
                                                         if byStep :
@@ -827,14 +826,12 @@ class ImportExportProfiles(Extension, QObject,):
 
     def changeValue(self, lblkey) -> bool:
         Logger.logException("d", "In ChangeValue")
-
-          
-        Logger.log("d", "_update_timer.start")        
+      
         dialog = self._createConfirmationDialog(lblkey)
 
         returnValue = dialog.exec()
         
-        Logger.log("d", "prop_value changed: %s = %s, lblkey ,returnValue)
+        Logger.log("d", "prop_value changed: %s = %s", lblkey ,returnValue)
         
         if VERSION_QT5:
             return returnValue == QMessageBox.Ok
@@ -845,7 +842,7 @@ class ImportExportProfiles(Extension, QObject,):
         '''Create a message box prompting the user if they want to update parameter.'''
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Information if VERSION_QT5 else QMessageBox.Icon.Information)
-        msgBox.setText(catalog.i18nc("@text", "Would you like to update :") + lblkey )
+        msgBox.setText(catalog.i18nc("@text", "Would you like to update : %s ?") % (lblkey) )
         msgBox.setWindowTitle(catalog.i18nc("@title", "Update settings"))
         msgBox.setStandardButtons((QMessageBox.Ok if VERSION_QT5 else QMessageBox.StandardButton.Ok) | (QMessageBox.Cancel if VERSION_QT5 else QMessageBox.StandardButton.Cancel))
         msgBox.setDefaultButton(QMessageBox.Ok if VERSION_QT5 else QMessageBox.StandardButton.Ok)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Import Export Profiles\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-22 12:37+0000\n"
+"POT-Creation-Date: 2023-12-22 14:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -82,11 +82,7 @@ msgctxt "@text"
 msgid "Exported data for profil %s"
 msgstr ""
 
-#: ImportExportProfiles.py:332 ImportExportProfiles.py:730
-#: ImportExportProfiles.py:747 ImportExportProfiles.py:752
-#: ImportExportProfiles.py:763 ImportExportProfiles.py:768
-#: ImportExportProfiles.py:787 ImportExportProfiles.py:799
-#: ImportExportProfiles.py:825
+#: ImportExportProfiles.py:332 ImportExportProfiles.py:824
 msgctxt "@title"
 msgid "Import Export CSV Profiles Tools"
 msgstr ""
@@ -172,33 +168,19 @@ msgctxt "@info:status"
 msgid "Profile {0} has an unknown file type or is corrupted."
 msgstr ""
 
-#: ImportExportProfiles.py:730 ImportExportProfiles.py:752
-#: ImportExportProfiles.py:763 ImportExportProfiles.py:768
-#: ImportExportProfiles.py:787 ImportExportProfiles.py:799
-#, python-format
-msgctxt "@text"
-msgid "Imported : %d changed keys to %s"
-msgstr ""
-
-#: ImportExportProfiles.py:747
-#, python-format
-msgctxt "@text"
-msgid "Imported : %d changed keys from %s"
-msgstr ""
-
-#: ImportExportProfiles.py:825
+#: ImportExportProfiles.py:824
 #, python-format
 msgctxt "@text"
 msgid "Imported profil : %d changed keys from %s"
 msgstr ""
 
-#: ImportExportProfiles.py:845
+#: ImportExportProfiles.py:849
 #, python-format
 msgctxt "@text"
-msgid "Would you like to update : %s ?"
+msgid "Would you like to update the slice for : %s ?"
 msgstr ""
 
-#: ImportExportProfiles.py:846
+#: ImportExportProfiles.py:850
 msgctxt "@title"
-msgid "Update settings"
+msgid "Update slice"
 msgstr ""

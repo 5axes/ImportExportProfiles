@@ -726,14 +726,16 @@ class ImportExportProfiles(Extension, QObject,):
                                                 if prop_value != kvalue :
                                                     if extrud == 0 :
                                                         if byStep :
-                                                            update_setting = self.changeValue(klbl)
+                                                            update_setting = self.changeValue(ktype + " / " + klbl)
+                                                            Logger.log("d", "prop_value changed: %s / %s = %s", kkey ,klbl, update_setting)
                                                         if update_setting :
                                                             stack.setProperty(kkey,"value",kvalue)
                                                             Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                             
                                                     if settable_per_extruder == True : 
-                                                        if byStep or update_setting == False :
-                                                            update_setting = self.changeValue(klbl)
+                                                        Logger.log("d", "settable_per_extruder : %s / %s = %s", kkey ,klbl, update_setting)
+                                                        if byStep and update_setting == False :
+                                                            update_setting = self.changeValue("Per extruder " + klbl)
                                                         if update_setting :
                                                             container.setProperty(kkey,"value",kvalue)
                                                             Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,kvalue, prop_value)
@@ -750,14 +752,16 @@ class ImportExportProfiles(Extension, QObject,):
                                                 if prop_value != C_bool :
                                                     if extrud == 0 :
                                                         if byStep :
-                                                            update_setting = self.changeValue(klbl)
+                                                            update_setting = self.changeValue(ktype + " / " + klbl)
+                                                            Logger.log("d", "prop_value changed: %s / %s = %s", kkey ,klbl, update_setting)
                                                         if update_setting :
                                                             stack.setProperty(kkey,"value",C_bool)
                                                             Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
                                                         
                                                     if settable_per_extruder == True : 
-                                                        if byStep or update_setting == False :
-                                                            update_setting = self.changeValue(klbl)
+                                                        Logger.log("d", "settable_per_extruder : %s / %s = %s", kkey ,klbl, update_setting)
+                                                        if byStep and update_setting == False :
+                                                            update_setting = self.changeValue("Per extruder " + klbl)
                                                         if update_setting :
                                                             container.setProperty(kkey,"value",C_bool)
                                                             Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,C_bool, prop_value)                                                       
@@ -770,14 +774,15 @@ class ImportExportProfiles(Extension, QObject,):
                                                 if prop_value != int(kvalue) :
                                                     if extrud == 0 :
                                                         if byStep :
-                                                            update_setting = self.changeValue(klbl)
+                                                            update_setting = self.changeValue(ktype + " / " + klbl)
                                                         if update_setting :
                                                             stack.setProperty(kkey,"value",int(kvalue))
                                                             Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                         
                                                     if settable_per_extruder == True :
-                                                        if byStep or update_setting == False :
-                                                            update_setting = self.changeValue(klbl)
+                                                        Logger.log("d", "settable_per_extruder : %s / %s = %s", kkey ,klbl, update_setting)
+                                                        if byStep and update_setting == False :
+                                                            update_setting = self.changeValue("Per extruder " + klbl)
                                                         if update_setting :
                                                             container.setProperty(kkey,"value",int(kvalue))
                                                             Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,int(kvalue), prop_value)
@@ -790,14 +795,16 @@ class ImportExportProfiles(Extension, QObject,):
                                                 if round(prop_value,4) != TransVal :
                                                     if extrud == 0 :
                                                         if byStep :
-                                                            update_setting = self.changeValue(klbl)
+                                                            update_setting = self.changeValue(ktype + " / " + klbl)
+                                                            Logger.log("d", "prop_value changed: %s / %s = %s", kkey ,klbl, update_setting)
                                                         if update_setting :
                                                             stack.setProperty(kkey,"value",TransVal)
                                                             Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, round(prop_value,4))
                                                             
                                                     if settable_per_extruder == True : 
-                                                        if byStep or update_setting == False :
-                                                            update_setting = self.changeValue(klbl)
+                                                        Logger.log("d", "settable_per_extruder : %s / %s = %s", kkey ,klbl, update_setting)
+                                                        if byStep and update_setting == False :
+                                                            update_setting = self.changeValue("Per extruder " + klbl)
                                                         if update_setting :
                                                             container.setProperty(kkey,"value",TransVal)
                                                             Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,TransVal, prop_value)
@@ -808,11 +815,12 @@ class ImportExportProfiles(Extension, QObject,):
                                             else :
                                                 # Case of the tables                                              
                                                 try:
-                                                    container.setProperty(kkey,"value",kvalue)
                                                     if byStep :
-                                                        update_setting = self.changeValue(klbl)
-                                                  
-                                                    Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
+                                                        update_setting = self.changeValue(ktype + " / " + klbl)
+                                                        Logger.log("d", "prop_value changed: %s / %s = %s", kkey ,klbl, update_setting)
+                                                    if update_setting :
+                                                        container.setProperty(kkey,"value",kvalue)
+                                                        Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, ktype)
                                                 except:
                                                     Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
                                                     continue
@@ -822,10 +830,10 @@ class ImportExportProfiles(Extension, QObject,):
                                             if kkey=="Profile" :
                                                 CPro=kvalue                                               
                                     except:
-                                        Logger.log("e", "Error kkey: %s" % kkey)
+                                        Logger.log("d", "Error kkey: %s" % kkey)
                                         continue                                       
                                 except:
-                                    Logger.log("e", "Error Extruder: %s" % row)
+                                    Logger.log("d", "Error Extruder: %s" % row)
                                     continue                             
                         except:
                             Logger.log("e", "Row does not have enough data: %s" % row)
@@ -856,11 +864,10 @@ class ImportExportProfiles(Extension, QObject,):
             else:
                 validValue = False               
             
-        Logger.log("d", "validValue : %s : %s", lblkey ,validValue)
-            
-        if validValue:
-            self._application.backend.forceSlice()
-            self._application.backend.slice()
+        # Logger.log("d", "validValue : %s : %s", lblkey ,validValue)
+        # if validValue:
+        #             self._application.backend.forceSlice()
+        #             self._application.backend.slice()
         
         return validValue
 

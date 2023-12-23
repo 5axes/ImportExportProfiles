@@ -78,6 +78,9 @@ from UM.Settings.InstanceContainer import InstanceContainer
 from UM.Util import parseBool
 
 i18n_cura_catalog = i18nCatalog("cura")
+i18n_catalog = i18nCatalog("fdmprinter.def.json")
+i18n_extrud_catalog = i18nCatalog("fdmextruder.def.json")
+
 
 Resources.addSearchPath(
 	os.path.join(os.path.abspath(os.path.dirname(__file__)),'resources')
@@ -708,10 +711,12 @@ class ImportExportProfiles(Extension, QObject,):
                             kkey=row[2]
                             ktype=row[3]
                             klbl=row[4]
+                            definition_key=kkey + " label"
+                            translated_label=i18n_catalog.i18nc(definition_key, klbl)
                             kvalue=row[5]
                             
                             # Logger.log("d", "Current Data = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue) 
-                            update_setting = True                            
+                            update_setting = 1                            
                             if extrud<extruder_count:
                                 try:
                                     container=extruder_stack[extrud]
@@ -726,17 +731,17 @@ class ImportExportProfiles(Extension, QObject,):
                                                 if prop_value != kvalue :
                                                     if extrud == 0 :
                                                         if byStep :
-                                                            update_setting = self.changeValue(ktype + " / " + klbl)
+                                                            update_setting = self.changeValue(translated_label)
                                                             Logger.log("d", "prop_value changed: %s / %s = %s", kkey ,klbl, update_setting)
-                                                        if update_setting :
+                                                        if update_setting == 1 :
                                                             stack.setProperty(kkey,"value",kvalue)
                                                             Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                             
                                                     if settable_per_extruder == True : 
                                                         Logger.log("d", "settable_per_extruder : %s / %s = %s", kkey ,klbl, update_setting)
-                                                        if byStep and update_setting == False :
-                                                            update_setting = self.changeValue("Per extruder " + klbl)
-                                                        if update_setting :
+                                                        if byStep and update_setting == 0 :
+                                                            update_setting = self.changeValue(catalog.i18nc("@text", "Per extruder  %s") % (translated_label))
+                                                        if update_setting == 1 :
                                                             container.setProperty(kkey,"value",kvalue)
                                                             Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                     else:
@@ -752,20 +757,19 @@ class ImportExportProfiles(Extension, QObject,):
                                                 if prop_value != C_bool :
                                                     if extrud == 0 :
                                                         if byStep :
-                                                            update_setting = self.changeValue(ktype + " / " + klbl)
+                                                            update_setting = self.changeValue(translated_label)
                                                             Logger.log("d", "prop_value changed: %s / %s = %s", kkey ,klbl, update_setting)
-                                                        if update_setting :
+                                                        if update_setting == 1 :
                                                             stack.setProperty(kkey,"value",C_bool)
                                                             Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
                                                         
                                                     if settable_per_extruder == True : 
                                                         Logger.log("d", "settable_per_extruder : %s / %s = %s", kkey ,klbl, update_setting)
-                                                        if byStep and update_setting == False :
-                                                            update_setting = self.changeValue("Per extruder " + klbl)
-                                                        if update_setting :
+                                                        if byStep and update_setting == 0 :
+                                                            update_setting = self.changeValue(catalog.i18nc("@text", "Per extruder  %s") % (translated_label))
+                                                        if update_setting == 1 :
                                                             container.setProperty(kkey,"value",C_bool)
-                                                            Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,C_bool, prop_value)                                                       
-                                                        
+                                                            Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,C_bool, prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
                                                     imported_count += 1
@@ -774,15 +778,15 @@ class ImportExportProfiles(Extension, QObject,):
                                                 if prop_value != int(kvalue) :
                                                     if extrud == 0 :
                                                         if byStep :
-                                                            update_setting = self.changeValue(ktype + " / " + klbl)
-                                                        if update_setting :
+                                                            update_setting = self.changeValue(translated_label)
+                                                        if update_setting == 1 :
                                                             stack.setProperty(kkey,"value",int(kvalue))
                                                             Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                         
                                                     if settable_per_extruder == True :
                                                         Logger.log("d", "settable_per_extruder : %s / %s = %s", kkey ,klbl, update_setting)
-                                                        if byStep and update_setting == False :
-                                                            update_setting = self.changeValue("Per extruder " + klbl)
+                                                        if byStep and update_setting == 0 :
+                                                            update_setting = self.changeValue(catalog.i18nc("@text", "Per extruder  %s") % (translated_label))
                                                         if update_setting :
                                                             container.setProperty(kkey,"value",int(kvalue))
                                                             Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,int(kvalue), prop_value)
@@ -795,17 +799,17 @@ class ImportExportProfiles(Extension, QObject,):
                                                 if round(prop_value,4) != TransVal :
                                                     if extrud == 0 :
                                                         if byStep :
-                                                            update_setting = self.changeValue(ktype + " / " + klbl)
+                                                            update_setting = self.changeValue(translated_label)
                                                             Logger.log("d", "prop_value changed: %s / %s = %s", kkey ,klbl, update_setting)
-                                                        if update_setting :
+                                                        if update_setting == 1 :
                                                             stack.setProperty(kkey,"value",TransVal)
                                                             Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, round(prop_value,4))
                                                             
                                                     if settable_per_extruder == True : 
                                                         Logger.log("d", "settable_per_extruder : %s / %s = %s", kkey ,klbl, update_setting)
-                                                        if byStep and update_setting == False :
-                                                            update_setting = self.changeValue("Per extruder " + klbl)
-                                                        if update_setting :
+                                                        if byStep and update_setting == 0 :
+                                                            update_setting = self.changeValue(catalog.i18nc("@text", "Per extruder  %s") % (translated_label))
+                                                        if update_setting == 1 :
                                                             container.setProperty(kkey,"value",TransVal)
                                                             Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,TransVal, prop_value)
                                                     else:
@@ -816,15 +820,17 @@ class ImportExportProfiles(Extension, QObject,):
                                                 # Case of the tables                                              
                                                 try:
                                                     if byStep :
-                                                        update_setting = self.changeValue(ktype + " / " + klbl)
+                                                        update_setting = self.changeValue(translated_label)
                                                         Logger.log("d", "prop_value changed: %s / %s = %s", kkey ,klbl, update_setting)
-                                                    if update_setting :
+                                                    if update_setting == 1 :
                                                         container.setProperty(kkey,"value",kvalue)
                                                         Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, ktype)
                                                 except:
                                                     Logger.log("d", "Value type Else = %d | %s | %s | %s",extrud, kkey, ktype, kvalue)
                                                     continue
-                                                 
+                                            if update_setting == -1 :   
+                                                Logger.log("d", "Abort")
+                                                break
                                         else:
                                             # Logger.log("d", "Current Data = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue) 
                                             if kkey=="Profile" :
@@ -847,23 +853,31 @@ class ImportExportProfiles(Extension, QObject,):
         Message(catalog.i18nc("@text", "Imported profil : %d changed keys from %s") % (imported_count, CPro) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
 
     def changeValue(self, lblkey) -> bool:
-        # Logger.logException("d", "In ChangeValue")
-        validValue = False 
+        
+        validValue = 0 
         dialog = self._createConfirmationDialog(lblkey)
 
         returnValue = dialog.exec()
         
         if VERSION_QT5:
             if returnValue == QMessageBox.Ok:
-                validValue = True
+                validValue = 1
             else:
-                validValue = False
+                validValue = 0
         else:
             if returnValue == QMessageBox.StandardButton.Ok:
-                validValue = True
+                validValue = 1
             else:
-                validValue = False               
-            
+                validValue = 0               
+
+        # Abort
+        if VERSION_QT5:
+            if returnValue == QMessageBox.Abort:
+                validValue = -1
+        else:
+            if returnValue == QMessageBox.StandardButton.Abort:
+                validValue = -1
+
         # Logger.log("d", "validValue : %s : %s", lblkey ,validValue)
         # if validValue:
         #             self._application.backend.forceSlice()
@@ -877,7 +891,7 @@ class ImportExportProfiles(Extension, QObject,):
         msgBox.setIcon(QMessageBox.Information if VERSION_QT5 else QMessageBox.Icon.Information)
         msgBox.setText(catalog.i18nc("@text", "Would you like to update the slice for : %s ?") % (lblkey) )
         msgBox.setWindowTitle(catalog.i18nc("@title", "Update slice"))
-        msgBox.setStandardButtons((QMessageBox.Ok if VERSION_QT5 else QMessageBox.StandardButton.Ok) | (QMessageBox.Cancel if VERSION_QT5 else QMessageBox.StandardButton.Cancel))
+        msgBox.setStandardButtons((QMessageBox.Ok if VERSION_QT5 else QMessageBox.StandardButton.Ok) | (QMessageBox.Ignore if VERSION_QT5 else QMessageBox.StandardButton.Ignore) | (QMessageBox.Abort if VERSION_QT5 else QMessageBox.StandardButton.Abort))
         msgBox.setDefaultButton(QMessageBox.Ok if VERSION_QT5 else QMessageBox.StandardButton.Ok)
 
         return msgBox

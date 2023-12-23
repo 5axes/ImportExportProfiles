@@ -710,7 +710,8 @@ class ImportExportProfiles(Extension, QObject,):
                             klbl=row[4]
                             kvalue=row[5]
                             
-                            # Logger.log("d", "Current Data = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue)  
+                            # Logger.log("d", "Current Data = %s | %d | %s | %s | %s | %s", section,extrud, kkey, ktype, klbl, kvalue) 
+                            update_setting = True                            
                             if extrud<extruder_count:
                                 try:
                                     container=extruder_stack[extrud]
@@ -723,17 +724,19 @@ class ImportExportProfiles(Extension, QObject,):
                                             
                                             if ktype == "str" or ktype == "enum":
                                                 if prop_value != kvalue :
-                                                    if extrud == 0 : 
-                                                        stack.setProperty(kkey,"value",kvalue)
+                                                    if extrud == 0 :
                                                         if byStep :
                                                             update_setting = self.changeValue(klbl)
+                                                        if update_setting :
+                                                            stack.setProperty(kkey,"value",kvalue)
+                                                            Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                             
                                                     if settable_per_extruder == True : 
-                                                        container.setProperty(kkey,"value",kvalue)
-                                                        if byStep :
+                                                        if byStep or update_setting = False :
                                                             update_setting = self.changeValue(klbl)
-                                
-                                                        Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
+                                                        if update_setting :
+                                                            container.setProperty(kkey,"value",kvalue)
+                                                            Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
                                                     imported_count += 1
@@ -745,33 +748,39 @@ class ImportExportProfiles(Extension, QObject,):
                                                     C_bool=False
                                                 
                                                 if prop_value != C_bool :
-                                                    if extrud == 0 : 
-                                                        stack.setProperty(kkey,"value",C_bool)
+                                                    if extrud == 0 :
                                                         if byStep :
                                                             update_setting = self.changeValue(klbl)
+                                                        if update_setting :
+                                                            stack.setProperty(kkey,"value",C_bool)
+                                                            Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
                                                         
                                                     if settable_per_extruder == True : 
-                                                        container.setProperty(kkey,"value",C_bool)
-                                                        if byStep :
+                                                        if byStep or update_setting = False :
                                                             update_setting = self.changeValue(klbl)
-                                                        Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,C_bool, prop_value)
+                                                        if update_setting :
+                                                            container.setProperty(kkey,"value",C_bool)
+                                                            Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,C_bool, prop_value)                                                       
+                                                        
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
                                                     imported_count += 1
                                                     
                                             elif ktype == "int" :
                                                 if prop_value != int(kvalue) :
-                                                    if extrud == 0 : 
-                                                        stack.setProperty(kkey,"value",int(kvalue))
+                                                    if extrud == 0 :
                                                         if byStep :
                                                             update_setting = self.changeValue(klbl)
+                                                        if update_setting :
+                                                            stack.setProperty(kkey,"value",int(kvalue))
+                                                            Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
                                                         
                                                     if settable_per_extruder == True :
-                                                        container.setProperty(kkey,"value",int(kvalue))
-                                                        if byStep :
+                                                        if byStep or update_setting = False :
                                                             update_setting = self.changeValue(klbl)
-                                                        
-                                                        Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,kvalue, prop_value)
+                                                        if update_setting :
+                                                            container.setProperty(kkey,"value",int(kvalue))
+                                                            Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,int(kvalue), prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
                                                     imported_count += 1
@@ -779,17 +788,19 @@ class ImportExportProfiles(Extension, QObject,):
                                             elif ktype == "float" :
                                                 TransVal=round(float(kvalue),4)
                                                 if round(prop_value,4) != TransVal :
-                                                    if extrud == 0 : 
-                                                        stack.setProperty(kkey,"value",TransVal)
+                                                    if extrud == 0 :
                                                         if byStep :
                                                             update_setting = self.changeValue(klbl)
+                                                        if update_setting :
+                                                            stack.setProperty(kkey,"value",TransVal)
+                                                            Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, round(prop_value,4))
                                                             
                                                     if settable_per_extruder == True : 
-                                                        container.setProperty(kkey,"value",TransVal)
-                                                        if byStep :
+                                                        if byStep or update_setting = False :
                                                             update_setting = self.changeValue(klbl)
-                                                       
-                                                        Logger.log("d", "prop_value changed: %s = %s / %s", kkey ,TransVal, prop_value)
+                                                        if update_setting :
+                                                            container.setProperty(kkey,"value",TransVal)
+                                                            Logger.log("d", "prop_value per extruder changed: %s = %s / %s", kkey ,TransVal, prop_value)
                                                     else:
                                                         Logger.log("d", "%s not settable_per_extruder", kkey)
                                                         

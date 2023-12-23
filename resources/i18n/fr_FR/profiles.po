@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: HtmlCuraSettings\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-22 14:27+0000\n"
-"PO-Revision-Date: 2023-12-22 15:32+0200\n"
+"POT-Creation-Date: 2023-12-23 16:36+0000\n"
+"PO-Revision-Date: 2023-12-23 17:37+0200\n"
 "Last-Translator: 5axes <5axes@free.fr>\n"
 "Language-Team: 5axes\n"
 "Language: fr\n"
@@ -82,7 +82,7 @@ msgctxt "@text"
 msgid "Exported data for profil %s"
 msgstr "Données exportées pour profil %s"
 
-#: ImportExportProfiles.py:332 ImportExportProfiles.py:824
+#: ImportExportProfiles.py:332 ImportExportProfiles.py:847
 msgctxt "@title"
 msgid "Import Export CSV Profiles Tools"
 msgstr "Outils d'Importation/Exportation les réglages au format CSV"
@@ -178,19 +178,19 @@ msgctxt "@info:status"
 msgid "Profile {0} has an unknown file type or is corrupted."
 msgstr "Le profil {0} est un type de fichier inconnu ou est corrompu."
 
-#: ImportExportProfiles.py:824
+#: ImportExportProfiles.py:847
 #, python-format
 msgctxt "@text"
 msgid "Imported profil : %d changed keys from %s"
 msgstr "Profil importé : %d clés modifiées depuis : %s"
 
-#: ImportExportProfiles.py:849
+#: ImportExportProfiles.py:878
 #, python-format
 msgctxt "@text"
 msgid "Would you like to update the slice for : %s ?"
 msgstr "Souhaitez-vous mettre à jour la découpe pour : %s ?"
 
-#: ImportExportProfiles.py:850
+#: ImportExportProfiles.py:879
 msgctxt "@title"
 msgid "Update slice"
 msgstr "Mise à jour de la découpe"

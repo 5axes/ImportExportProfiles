@@ -79,7 +79,7 @@ msgstr ""
 #: ImportExportProfiles.py:335
 #, python-format
 msgctxt "@text"
-msgid "Exported data for profil %s"
+msgid "Exported data for profile %s"
 msgstr ""
 
 #: ImportExportProfiles.py:335 ImportExportProfiles.py:853
@@ -178,7 +178,7 @@ msgstr ""
 #: ImportExportProfiles.py:853
 #, python-format
 msgctxt "@text"
-msgid "Imported profil : %d changed keys from %s"
+msgid "Imported profile : %d changed keys from %s"
 msgstr ""
 
 #: ImportExportProfiles.py:892

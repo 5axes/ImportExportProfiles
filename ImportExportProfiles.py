@@ -332,7 +332,7 @@ class ImportExportProfiles(Extension, QObject,):
             return
 
         Message().hide()
-        Message(catalog.i18nc("@text", "Exported data for profil %s") % P_Name, title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+        Message(catalog.i18nc("@text", "Exported data for profile %s") % P_Name, title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
 
     def _WriteRow(self,csvwriter,Section,Extrud,Key,KType,KeyLbl,ValStr):
         
@@ -850,7 +850,7 @@ class ImportExportProfiles(Extension, QObject,):
             return
 
         Message().hide()
-        Message(catalog.i18nc("@text", "Imported profil : %d changed keys from %s") % (imported_count, CPro) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
+        Message(catalog.i18nc("@text", "Imported profile : %d changed keys from %s") % (imported_count, CPro) , title = catalog.i18nc("@title", "Import Export CSV Profiles Tools")).show()
 
     def changeValue(self, lblkey) -> bool:
         
